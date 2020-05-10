@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">OdometryApp_v10</string>
+    <string name="app_name">AutoPlotBot</string>
+
+    <string-array name="parameterTypes">
+        <item>Parameter Type</item>
+        <item>String</item>
+        <item>Integer</item>
+        <item>Double</item>
+<!--        <item>Array</item>-->
+    </string-array>
 </resources>

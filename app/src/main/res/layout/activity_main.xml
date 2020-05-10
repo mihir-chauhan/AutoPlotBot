@@ -1,18 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     tools:context=".MainActivity">
 
-    <TextView
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/addFunctionFloatingActionMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        app:menu_backgroundColor="@android:color/transparent"
+        app:menu_fab_label=""
+        app:menu_labels_showShadow="true"
+        app:menu_openDirection="up"
+        app:menu_colorNormal="@color/colorAccent"
+        app:menu_colorPressed="@color/colorAccent"
+        app:menu_colorRipple="@color/colorAccent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/addNewDrivetrainFunctionFloatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_label="New Drivetrain"
+            app:fab_size="mini"
+            android:src="@drawable/ic_train_black_24dp"
+            app:fab_colorNormal="@color/colorAccent"
+            app:fab_colorRipple="@color/colorAccent"
+            app:fab_colorPressed="@color/colorAccent"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/addNewAccessoryFunctionFloatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_label="New Accessory"
+            app:fab_size="mini"
+            android:src="@drawable/ic_headset_mic_black_24dp"
+            app:fab_colorNormal="@color/colorAccent"
+            app:fab_colorRipple="@color/colorAccent"
+            app:fab_colorPressed="@color/colorAccent"/>
+
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/addDrivetrainFunctionFloatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_label="Drivetrain Function"
+            app:fab_size="mini"
+            android:src="@drawable/ic_train_black_24dp"
+            app:fab_colorNormal="@color/colorAccent"
+            app:fab_colorRipple="@color/colorAccent"
+            app:fab_colorPressed="@color/colorAccent"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/addAccessoryFunctionFloatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:fab_label="Accessory Function"
+            app:fab_size="mini"
+            android:src="@drawable/ic_headset_mic_black_24dp"
+            app:fab_colorNormal="@color/colorAccent"
+            app:fab_colorRipple="@color/colorAccent"
+            app:fab_colorPressed="@color/colorAccent"/>
+
+    </com.github.clans.fab.FloatingActionMenu>
+
+    <ImageView
+        android:id="@+id/fieldView"
+        android:layout_width="450px"
+        android:layout_height="450px"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="21px"
+        android:layout_marginTop="17px"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/field_image" />
+
+
+</RelativeLayout>

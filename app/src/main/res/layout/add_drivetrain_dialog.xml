@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/addNewDrivetrainFunctionName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="FunctionName"
+        android:inputType="textAutoCorrect" />
+
+    <TextView
+        android:id="@+id/parameterInfo"
+        android:layout_width="290dp"
+        android:layout_height="50dp"
+        android:textSize="20sp"
+        android:gravity="center_vertical"
+        android:layout_below="@+id/addNewDrivetrainFunctionName"
+        android:text="Parameters:"
+        android:textStyle="bold"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="1sp"
+        android:autoSizeMaxTextSize="50sp"
+        android:autoSizeStepGranularity="1sp"/>
+
+
+    <Button
+        android:id="@+id/addParam"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_below="@id/addNewDrivetrainFunctionName"
+        android:layout_alignParentRight="true"
+        android:gravity="center"
+        android:text="+"
+        android:textSize="20sp" />
+
+    <ListView
+            android:id="@+id/addnewDrivetrainFunctionListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/addParam"
+            />
+
+</RelativeLayout>

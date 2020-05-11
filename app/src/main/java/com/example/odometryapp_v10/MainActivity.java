@@ -10,6 +10,8 @@ import android.widget.Toast;
 import com.example.odometryapp_v10.Dialogs.AddNewDrivetrainFunction;
 import com.github.clans.fab.FloatingActionButton;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity implements AddNewDrivetrainFunction.addDrivetrainFunctionListener {
 
     @Override
@@ -27,8 +29,8 @@ public class MainActivity extends AppCompatActivity implements AddNewDrivetrainF
     }
 
     @Override
-    public void addDrivetrainFunction() {
-
+    public void addDrivetrainFunction(ArrayList<ArrayList<Object>> allParameters) {
+        System.out.println(allParameters);
     }
 
     private void openAddDrivetrainFunctionDialog() {

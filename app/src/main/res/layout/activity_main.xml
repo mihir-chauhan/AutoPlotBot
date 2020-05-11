@@ -14,7 +14,7 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"
+        android:layout_margin="10dp"
         app:menu_backgroundColor="@android:color/transparent"
         app:menu_fab_label=""
         app:menu_labels_showShadow="true"
@@ -32,7 +32,7 @@
             android:src="@drawable/ic_train_black_24dp"
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorRipple="@color/colorAccent"
-            app:fab_colorPressed="@color/colorAccent"/>
+            app:fab_colorPressed="@android:color/white"/>
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/addNewAccessoryFunctionFloatingActionButton"
@@ -43,7 +43,7 @@
             android:src="@drawable/ic_headset_mic_black_24dp"
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorRipple="@color/colorAccent"
-            app:fab_colorPressed="@color/colorAccent"/>
+            app:fab_colorPressed="@android:color/white"/>
 
 
         <com.github.clans.fab.FloatingActionButton
@@ -55,7 +55,7 @@
             android:src="@drawable/ic_train_black_24dp"
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorRipple="@color/colorAccent"
-            app:fab_colorPressed="@color/colorAccent"/>
+            app:fab_colorPressed="@android:color/white"/>
 
         <com.github.clans.fab.FloatingActionButton
             android:id="@+id/addAccessoryFunctionFloatingActionButton"
@@ -66,7 +66,7 @@
             android:src="@drawable/ic_headset_mic_black_24dp"
             app:fab_colorNormal="@color/colorAccent"
             app:fab_colorRipple="@color/colorAccent"
-            app:fab_colorPressed="@color/colorAccent"/>
+            app:fab_colorPressed="@android:color/white"/>
 
     </com.github.clans.fab.FloatingActionMenu>
 

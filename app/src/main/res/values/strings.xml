@@ -6,6 +6,7 @@
         <item>String</item>
         <item>Integer</item>
         <item>Double</item>
-<!--        <item>Array</item>-->
+        <item>Boolean</item>
+        <!--        <item>Array</item>-->
     </string-array>
 </resources>

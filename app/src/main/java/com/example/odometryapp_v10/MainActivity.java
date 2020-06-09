@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     }
 
-    JSONArray jsonArray = new JSONArray();
     @Override
     public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters) {
         System.out.println(allParameters);
@@ -94,11 +93,10 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
             jsonObject.put("parameters", paramObject);
 
-            jsonArray.put(jsonObject);
+            JSON.appendJSONToTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", jsonObject, null, JSON.JSONArchitecture.Function_Notation);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        JSON.appendJSONToTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", jsonArray, JSON.JSONArchitecture.Function_Notation);
     }
 
     @Override

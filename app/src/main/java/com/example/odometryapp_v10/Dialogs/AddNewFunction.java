@@ -54,8 +54,12 @@ public class AddNewFunction extends AppCompatDialogFragment {
                         allParameters.add(adapter.getInfoFromView(adapter.getViewByPosition(position, listView)));
                     }
                 }
-
-                listener.addNewFunction(functionName.getText().toString(), allParameters);
+                //TODO: add validator for spinners and parameter names to make sure they are not empty
+                if(!functionName.getText().toString().isEmpty()) {
+                    listener.addNewFunction(functionName.getText().toString(), allParameters);
+                } else {
+                    Toast.makeText(view.getContext(), "Unable to add new function", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 

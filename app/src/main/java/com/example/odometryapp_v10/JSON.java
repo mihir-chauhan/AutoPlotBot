@@ -32,9 +32,9 @@ public class JSON {
         }
         FileOutputStream outputStream;
         try {
-            if(fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
+            if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
                 fileJSONObject.put("program", jsonArray);
-            } else if(fileArchitecture == JSONArchitecture.Function_Notation) {
+            } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
                 fileJSONObject.put("function", jsonArray);
             }
         } catch (Exception e) {
@@ -72,11 +72,8 @@ public class JSON {
         }
     }
 
+    @Nullable
     public static JSONObject readJSONTextFile(String fileName, @Nullable String filePath) {
-        return readFile(fileName, filePath);
-    }
-
-    @Nullable public static JSONObject readFile(String fileName, @Nullable String filePath) {
         if (!fileName.contains(".txt")) {
             fileName += ".txt";
         }
@@ -104,26 +101,51 @@ public class JSON {
                 return new JSONObject(sb.toString());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            return null;
         }
         return null;
     }
 
-    public static void appendJSONToTextFile(String fileName, @Nullable String filePath, JSONArray jsonArray, JSONArchitecture fileArchitecture) {
+    public static void appendJSONToTextFile(String fileName, @Nullable String filePath, @Nullable JSONObject jsonObject, @Nullable JSONArray jsonArray, JSONArchitecture fileArchitecture) {
 
-        JSONObject fileContents = readJSONTextFile(fileName, filePath);
 
-        if(fileContents == null || fileContents.toString().isEmpty()) {
-            writeJSONToTextFile(fileName, filePath, jsonArray, fileArchitecture);
+        JSONObject fileContents = null;
+        try {
+            fileContents = readJSONTextFile(fileName, filePath);
+        } catch (Exception e) {
+
+        }
+
+        if (fileContents == null || fileContents.length() == 0) {
+            if (jsonArray != null) {
+                writeJSONToTextFile(fileName, filePath, jsonArray, fileArchitecture);
+            } else if (jsonObject != null) {
+                JSONArray jArray = new JSONArray();
+                jArray.put(jsonObject);
+                writeJSONToTextFile(fileName, filePath, jArray, fileArchitecture);
+            } else {
+                throw new NullPointerException("Both @Nullable JSON inputs are NULL -- when writing to new file");
+            }
+            return;
         }
 
         System.out.println("JSON File Contents: " + fileContents);
 
         try {
-            if(fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
-                fileContents.getJSONArray("program").put(jsonArray);
-            } else if(fileArchitecture == JSONArchitecture.Function_Notation) {
-                fileContents.getJSONArray("function").put(jsonArray);
+            if (jsonArray == null && jsonObject != null) {
+                if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
+                    fileContents.getJSONArray("program").put(jsonObject);
+                } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
+                    fileContents.getJSONArray("function").put(jsonObject);
+                }
+            } else if (jsonArray != null && jsonObject == null) {
+                if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
+                    fileContents.getJSONArray("program").put(jsonObject);
+                } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
+                    fileContents.getJSONArray("function").put(jsonObject);
+                }
+            } else {
+                throw new NullPointerException("Both @Nullable JSON inputs are NULL -- when appending to existing file");
             }
         } catch (JSONException e) {
             e.printStackTrace();

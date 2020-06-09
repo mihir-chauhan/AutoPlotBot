@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.view.View;
 
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
+import com.example.odometryapp_v10.Dialogs.CallFunction;
 import com.github.clans.fab.FloatingActionButton;
 
 import org.json.JSONArray;
@@ -18,7 +19,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener {
+public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,13 +28,23 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
         checkForWritePermission();
 
-        FloatingActionButton addNewFunction = findViewById(R.id.addNewFunctionFloatingActionButton);
+        FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
         addNewFunction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AddNewFunction addNewFunction = new AddNewFunction();
                 addNewFunction.setCancelable(false);
-                addNewFunction.show(getSupportFragmentManager(), "addNewFunctionDialog");
+                addNewFunction.show(getSupportFragmentManager(), "addNewFunction");
+            }
+        });
+
+        FloatingActionButton callFunction = findViewById(R.id.callFunction);
+        callFunction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CallFunction callFunction = new CallFunction();
+                callFunction.setCancelable(false);
+                callFunction.show(getSupportFragmentManager(), "callFunction");
             }
         });
     }
@@ -88,5 +99,10 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             e.printStackTrace();
         }
         JSON.writeJSONToTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", jsonArray, JSON.JSONArchitecture.Function_Notation, false);
+    }
+
+    @Override
+    public void callFunction() {
+
     }
 }

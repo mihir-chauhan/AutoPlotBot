@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/addNewFunctionName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Function Name"
+        android:inputType="textAutoCorrect" />
+
+
+    <Button
+        android:id="@+id/addParameters"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/addNewFunctionName"
+        android:layout_alignParentRight="true"
+        android:gravity="center"
+        android:text="+"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/removeParameters"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/addNewFunctionName"
+        android:layout_toLeftOf="@id/addParameters"
+        android:gravity="center"
+        android:text="-"
+        android:textSize="20sp" />
+
+    <TextView
+        android:layout_width="290dp"
+        android:layout_height="50dp"
+        android:textSize="30sp"
+        android:gravity="center_vertical"
+        android:layout_below="@+id/addNewFunctionName"
+        android:text="Parameters:"
+        android:textStyle="bold"/>
+
+
+
+
+    <ListView
+        android:id="@+id/addNewFunctionListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/addParameters"
+        />
+
+</RelativeLayout>

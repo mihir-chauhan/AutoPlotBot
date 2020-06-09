@@ -12,12 +12,46 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 public class JSON {
-    public static enum JSONArchitecture {
+    public enum JSONArchitecture {
         Function_Notation, DefaultRobotController_Notation
     }
 
-
     public static void writeJSONToTextFile(String fileName, @Nullable String filePath, JSONArray jsonArray, JSONArchitecture fileArchitecture, boolean appendingToFile) {
+        JSONObject fileJSONObject = new JSONObject();
+        if (!fileName.contains(".txt")) {
+            fileName += ".txt";
+        }
+        File file = new File(filePath, fileName);
+        if (filePath == null) {
+            file = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/", fileName);
+        }
+        FileOutputStream outputStream;
+        try {
+            if(fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
+                fileJSONObject.put("program", jsonArray);
+            } else if(fileArchitecture == JSONArchitecture.Function_Notation) {
+                fileJSONObject.put("function", jsonArray);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        byte[] data = fileJSONObject.toString().getBytes();
+        try {
+            outputStream = new FileOutputStream(file, appendingToFile);
+            outputStream.write(data);
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void readJSONTextFile(String fileName, @Nullable String filePath, ) {
+
+    }
+
+    public static void appendJSONToTextFile(String fileName, @Nullable String filePath, JSONArray jsonArray, JSONArchitecture fileArchitecture, boolean appendingToFile) {
+
         JSONObject fileJSONObject = new JSONObject();
         if (!fileName.contains(".txt")) {
             fileName += ".txt";

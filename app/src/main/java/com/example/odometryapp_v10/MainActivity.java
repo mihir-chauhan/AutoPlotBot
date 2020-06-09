@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         } catch (Exception e) {
             e.printStackTrace();
         }
-        JSON.writeJSONToTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", jsonArray, JSON.JSONArchitecture.Function_Notation, false);
+        JSON.appendJSONToTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", jsonArray, JSON.JSONArchitecture.Function_Notation);
     }
 
     @Override

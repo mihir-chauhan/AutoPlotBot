@@ -1,13 +1,20 @@
 package com.example.odometryapp_v10;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.github.clans.fab.FloatingActionButton;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -17,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        checkForWritePermission();
 
         FloatingActionButton addNewFunction = findViewById(R.id.addNewFunctionFloatingActionButton);
         addNewFunction.setOnClickListener(new View.OnClickListener() {
@@ -29,9 +38,55 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         });
     }
 
+    private void checkForWritePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Permission is not granted
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    // Show an explanation to the user *asynchronously* -- don't block
+                    // this thread waiting for the user's response! After the user
+                    // sees the explanation, try again to request the permission.
+                } else {
+                    // No explanation needed; request the permission
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 11039);
+
+                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                    // app-defined int constant. The callback method gets the
+                    // result of the request.
+                }
+            } else {
+                // Permission has already been granted
+            }
+        }
+
+    }
+
+    JSONArray jsonArray = new JSONArray();
     @Override
     public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters) {
         System.out.println(allParameters);
-        JSON.writeJSONToTextFile(Environment.getExternalStorageDirectory() + "/Innov8rz/", fileName);
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("functionName", functionName);
+            JSONObject paramObject = new JSONObject();
+            for(int parameter = 0; parameter < allParameters.size(); parameter++) {
+                paramObject.put(allParameters.get(parameter).get(0).toString(), allParameters.get(parameter).get(1).toString());
+            }
+
+            jsonObject.put("parameters", paramObject);
+
+            jsonArray.put(jsonObject);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        JSON.writeJSONToTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", jsonArray, JSON.JSONArchitecture.Function_Notation, false);
     }
 }

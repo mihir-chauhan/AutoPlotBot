@@ -17,7 +17,7 @@ public class JSON {
     }
 
 
-    public static void writeJSONToTextFile(String fileName, @Nullable String filePath, JSONArray jsonArray, JSONArchitecture fileArchitecture) {
+    public static void writeJSONToTextFile(String fileName, @Nullable String filePath, JSONArray jsonArray, JSONArchitecture fileArchitecture, boolean appendingToFile) {
         JSONObject fileJSONObject = new JSONObject();
         if (!fileName.contains(".txt")) {
             fileName += ".txt";
@@ -38,7 +38,7 @@ public class JSON {
         }
         byte[] data = fileJSONObject.toString().getBytes();
         try {
-            outputStream = new FileOutputStream(file);
+            outputStream = new FileOutputStream(file, appendingToFile);
             outputStream.write(data);
             outputStream.flush();
             outputStream.close();

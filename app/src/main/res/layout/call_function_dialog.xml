@@ -22,7 +22,7 @@
         android:textStyle="bold"/>
 
     <ListView
-        android:id="@+id/addNewFunctionListView"
+        android:id="@+id/callFunctionListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"

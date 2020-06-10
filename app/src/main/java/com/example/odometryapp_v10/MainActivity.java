@@ -47,7 +47,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 callFunction.show(getSupportFragmentManager(), "callFunction");
             }
         });
+
     }
+
 
     private void checkForWritePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -82,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     @Override
     public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters) {
-        System.out.println(allParameters);
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("functionName", functionName);
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     @Override
-    public void callFunction() {
-
+    public void callFunction(ArrayList<Object> functionInfo) {
+        System.out.println("RECEIVED DATA: " + functionInfo);
     }
 }

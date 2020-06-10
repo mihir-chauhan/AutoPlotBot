@@ -77,7 +77,6 @@ public class JSON {
         if (!fileName.contains(".txt")) {
             fileName += ".txt";
         }
-        System.out.println(fileName);
         StringBuilder sb = new StringBuilder();
         try {
             File textFile = new File(filePath, fileName);
@@ -96,7 +95,6 @@ public class JSON {
 
                 fis.close();
 
-                System.out.println("File Contents: " + sb);
 
                 return new JSONObject(sb.toString());
             }
@@ -129,7 +127,6 @@ public class JSON {
             return;
         }
 
-        System.out.println("JSON File Contents: " + fileContents);
 
         try {
             if (jsonArray == null && jsonObject != null) {
@@ -151,8 +148,18 @@ public class JSON {
             e.printStackTrace();
         }
 
-        System.out.println("FINAL JSON File Contents: " + fileContents);
 
         writeJSONToTextFile(fileName, filePath, fileContents);
+    }
+
+    public static String splitCamelCase(String s) {
+        return s.replaceAll(
+                String.format("%s|%s|%s",
+                        "(?<=[A-Z])(?=[A-Z][a-z])",
+                        "(?<=[^A-Z])(?=[A-Z])",
+                        "(?<=[A-Za-z])(?=[^A-Za-z])"
+                ),
+                " "
+        );
     }
 }

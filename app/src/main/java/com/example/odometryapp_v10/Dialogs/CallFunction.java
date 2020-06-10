@@ -6,38 +6,85 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.Switch;
 
 import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.example.odometryapp_v10.JSON;
 import com.example.odometryapp_v10.R;
 
+import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-public class CallFunction extends AppCompatDialogFragment {
+public class CallFunction extends AppCompatDialogFragment implements AdapterView.OnItemSelectedListener {
     private callFunctionListener listener;
     private Spinner functionSelectorSpinner;
     private View view;
+    final List<String> allFunctionNames = new ArrayList<>();
+    ListView listView;
+    String selectedFunctionName;
+    CallFunctionListViewAdapter adapter;
+
+    private enum ParameterTypes {
+        String, Integer, Double, Boolean
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final LayoutInflater inflater = getActivity().getLayoutInflater();
         view = inflater.inflate(R.layout.call_function_dialog, null);
+        initalizeCallFunctionsDialogContents(view);
+
+        builder.setView(view).setTitle("Call Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+            }
+        }).setPositiveButton("done", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                try {
+                    ArrayList<Object> functionInfo = new ArrayList<>();
+                    JSONArray jsonArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
+                    for (int x = 0; x < jsonArray.getJSONObject(returnPositionFromJSONArray(jsonArray, selectedFunctionName)).getJSONObject("parameters").length(); x++) {
+                        functionInfo.add(adapter.getValuesFromView(x));
+                    }
+                    listener.callFunction(functionInfo);
+                } catch (Exception e) {
+                    listener.callFunction(null);
+                }
+            }
+        });
+        return builder.create();
+    }
+
+    private void initalizeCallFunctionsDialogContents(final View view) {
+        listView = view.findViewById(R.id.callFunctionListView);
+        listView.setDivider(null);
+        listView.setDividerHeight(0);
+        String[] parameterTypes = new String[]{};
+        String[] parameterNames = new String[]{};
+        adapter = new CallFunctionListViewAdapter(this.getContext(), parameterTypes, parameterNames);
+        listView.setAdapter(adapter);
+
         functionSelectorSpinner = view.findViewById(R.id.functionSelector);
         List<String> spinnerArray = new ArrayList<>();
         spinnerArray.add("Select A Function To Call");
@@ -45,31 +92,89 @@ public class CallFunction extends AppCompatDialogFragment {
             JSONArray jsonArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
             if (jsonArray != null) {
                 for (int i = 0; i < jsonArray.length(); i++) {
-                    spinnerArray.add(jsonArray.getJSONObject(i).getString("functionName"));
+                    allFunctionNames.add(jsonArray.getJSONObject(i).getString("functionName"));
+                    String functionName = JSON.splitCamelCase(jsonArray.getJSONObject(i).getString("functionName"));
+                    spinnerArray.add(functionName.substring(0, 1).toUpperCase() + functionName.substring(1).toLowerCase());
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, spinnerArray);
+        final ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, spinnerArray);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        functionSelectorSpinner.setTag("Select A Function To Call");
         functionSelectorSpinner.setAdapter(spinnerAdapter);
+        functionSelectorSpinner.setOnItemSelectedListener(this);
+    }
 
-//        final CustomListViewAdapter adapter = new CustomListViewAdapter();
+    private void updateListViewFromSelection(final ListView listView, final Context context) {
+        String functionName = allFunctionNames.get(functionSelectorSpinner.getSelectedItemPosition() - 1);
+        selectedFunctionName = functionName;
+        try {
+            JSONArray jsonArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
+            if (jsonArray != null) {
+                int i = returnPositionFromJSONArray(jsonArray, functionName);
+                if (i != -1) {
+                    ArrayList<String> parameterTypes = new ArrayList<>();
+                    ArrayList<String> parameterNames = new ArrayList<>();
+                    Iterator<String> keys = jsonArray.getJSONObject(i).getJSONObject("parameters").keys();
 
-        builder.setView(view).setTitle("Call Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        try {
+                            parameterNames.add(key);
+                            parameterTypes.add(jsonArray.getJSONObject(i).getJSONObject("parameters").get(key).toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
 
+                    //image_urls.toArray(new String[image_urls.size()]);
+                    final String[] parameterNamesArray = parameterNames.toArray(new String[parameterNames.size()]);
+                    final String[] parameterTypesArray = parameterTypes.toArray(new String[parameterTypes.size()]);
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            listView.setAdapter(new CallFunctionListViewAdapter(context, parameterTypesArray, parameterNamesArray));
+                        }
+                    });
+                }
             }
-        }).setPositiveButton("done", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public Integer returnPositionFromJSONArray(JSONArray jsonArray, String name) {
+        for (int i = 0; i < jsonArray.length(); i++) {
+            try {
+                if (jsonArray.getJSONObject(i).getString("functionName").equals(name)) {
+                    return i;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        });
-        return builder.create();
+        }
+        return -1;
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, final View view, int position, long id) {
+        if (functionSelectorSpinner.getSelectedItemPosition() == 0) {
+            final String[] parameterNamesArray = new String[]{};
+            final String[] parameterTypesArray = new String[]{};
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    listView.setAdapter(new CallFunctionListViewAdapter(view.getContext(), parameterTypesArray, parameterNamesArray));
+                }
+            });
+        } else {
+            updateListViewFromSelection(listView, view.getContext());
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
     }
 
     @Override
@@ -83,62 +188,72 @@ public class CallFunction extends AppCompatDialogFragment {
         }
     }
 
-
     public interface callFunctionListener {
-        void callFunction();
+        void callFunction(ArrayList<Object> functionInfo);
     }
 
+    private class CallFunctionListViewAdapter extends ArrayAdapter<String> {
+        private String[] parameterNames;
 
-    class CustomListViewAdapter extends BaseAdapter {
-        @Override
-        public int getCount() {
-            return 0;
-        }
-
-        @Override
-        public Object getItem(int position) {
-//            if(numberOfParameters >= 1) {
-//                ArrayList<Object> parameter = new ArrayList<>();
-//                EditText parameterName = view.findViewById(R.id.parameterInfo);
-//                parameter.add(parameterName.getText().toString());
-//                Spinner parameterType = view.findViewById(R.id.parameterType);
-//                parameter.add(parameterType.getSelectedItem());
-//                return parameter;
-//            }
-            return null;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
+        public CallFunctionListViewAdapter(Context context, String[] typeOfParameters, String[] parameterNames) {
+            super(context, -1, -1, typeOfParameters);
+            this.parameterNames = parameterNames;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            getItem(position);
-            convertView = getLayoutInflater().inflate(R.layout.custom_listview_layout, null);
-            return convertView;
-        }
+            RelativeLayout listLayout = new RelativeLayout(this.getContext());
+            listLayout.setLayoutParams(new AbsListView.LayoutParams(
+                    AbsListView.LayoutParams.WRAP_CONTENT,
+                    75));
 
-        public View getViewByPosition(int pos, ListView listView) {
-            final int firstListItemPosition = listView.getFirstVisiblePosition();
-            final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+            EditText editText = new EditText(this.getContext());
+            editText.setWidth(500);
+            editText.setHint(parameterNames[position].substring(0, 1).toUpperCase() + parameterNames[position].substring(1));
+            editText.setId(position);
+            editText.requestFocus();
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(editText, InputMethodManager.SHOW_FORCED);
 
-            if (pos < firstListItemPosition || pos > lastListItemPosition) {
-                return listView.getAdapter().getView(pos, null, listView);
-            } else {
-                final int childIndex = pos - firstListItemPosition;
-                return listView.getChildAt(childIndex);
+            Switch booleanSwitch = new Switch(this.getContext());
+            booleanSwitch.setWidth(500);
+            booleanSwitch.setText(parameterNames[position]);
+
+            if (super.getItem(position) == ParameterTypes.String.toString()) {
+                editText.setInputType(InputType.TYPE_CLASS_TEXT);
+            } else if (super.getItem(position) == ParameterTypes.Integer.toString()) {
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+            } else if (super.getItem(position) == ParameterTypes.Double.toString()) {
+                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
+            } else if (super.getItem(position) == ParameterTypes.Boolean.toString()) {
+                booleanSwitch.setChecked(false);
             }
+            if (super.getItem(position) != ParameterTypes.Boolean.toString()) {
+                listLayout.addView(editText);
+                UIUtil.showKeyboard(getContext(), editText);
+                return listLayout;
+            }
+
+            listLayout.addView(booleanSwitch);
+            return listLayout;
+
         }
 
-        public ArrayList<Object> getInfoFromView(View view) {
-            ArrayList<Object> parameterArray = new ArrayList<>();
-            EditText parameterName = view.findViewById(R.id.parameterInfo);
-            parameterArray.add(parameterName.getText().toString());
-            Spinner parameterType = view.findViewById(R.id.parameterType);
-            parameterArray.add(parameterType.getSelectedItem().toString());
-            return parameterArray;
+        public ArrayList<Object> getValuesFromView(int position) {
+            ArrayList<Object> functionInfo = new ArrayList<>();
+            EditText editText = null;
+            Switch aSwitch = null;
+            try {
+                editText = view.findViewById(position);
+            } catch (Exception e) {
+                aSwitch = view.findViewById(position);
+            }
+            if (editText != null && !editText.getText().toString().isEmpty()) {
+                functionInfo.add(editText.getText().toString());
+            } else if (aSwitch != null) {
+                functionInfo.add(aSwitch.isChecked());
+            }
+            return functionInfo;
         }
     }
 }

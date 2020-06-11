@@ -93,10 +93,11 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     @Override
-    public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters) {
+    public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType) {
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("functionName", functionName);
+            jsonObject.put("functionType", functionType);
             JSONObject paramObject = new JSONObject();
             for(int parameter = 0; parameter < allParameters.size(); parameter++) {
                 paramObject.put(allParameters.get(parameter).get(0).toString(), allParameters.get(parameter).get(1).toString());

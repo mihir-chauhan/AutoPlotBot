@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -212,10 +213,18 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
             if(parameterTypes.get(position).equals(ParameterTypes.Boolean.toString())) {
                 holder.booleanSwitch.setVisibility(View.VISIBLE);
-                holder.booleanSwitch.setText(parameterNames.get(position));
+                holder.booleanSwitch.setText(parameterNames.get(position).substring(0, 1).toUpperCase() + parameterNames.get(position).substring(1));
             } else {
                 holder.editText.setVisibility(View.VISIBLE);
-                holder.editText.setHint(parameterNames.get(position));
+                holder.editText.setHint(parameterNames.get(position).substring(0, 1).toUpperCase() + parameterNames.get(position).substring(1));
+                if(parameterTypes.get(position).equals(ParameterTypes.String.toString())) {
+                    holder.editText.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
+                } else if(parameterTypes.get(position).equals(ParameterTypes.Integer.toString())) {
+                    holder.editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                } else if(parameterTypes.get(position).equals(ParameterTypes.Double.toString())) {
+                    holder.editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                }
+
             }
 
             return convertView;

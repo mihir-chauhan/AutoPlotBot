@@ -14,12 +14,20 @@
         android:hint="Function Name"
         android:inputType="textAutoCorrect" />
 
+    <Spinner
+        android:id="@+id/functionTypeSelector"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/addNewFunctionName"
+        android:entries="@array/functionTypes"
+        android:hint="Function Type"/>
+
 
     <Button
         android:id="@+id/addParameters"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_below="@id/addNewFunctionName"
+        android:layout_below="@id/functionTypeSelector"
         android:layout_alignParentRight="true"
         android:gravity="center"
         android:text="+"
@@ -29,7 +37,7 @@
         android:id="@+id/removeParameters"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_below="@id/addNewFunctionName"
+        android:layout_below="@id/functionTypeSelector"
         android:layout_toLeftOf="@id/addParameters"
         android:gravity="center"
         android:text="-"
@@ -40,7 +48,7 @@
         android:layout_height="50dp"
         android:textSize="30sp"
         android:gravity="center_vertical"
-        android:layout_below="@+id/addNewFunctionName"
+        android:layout_below="@+id/functionTypeSelector"
         android:text="Parameters:"
         android:textStyle="bold"/>
 

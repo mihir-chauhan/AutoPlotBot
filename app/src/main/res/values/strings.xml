@@ -7,6 +7,11 @@
         <item>Integer</item>
         <item>Double</item>
         <item>Boolean</item>
-        <!--        <item>Array</item>-->
+    </string-array>
+    <string-array name="functionTypes">
+        <item>Function Type</item>
+        <item>Drivetrain</item>
+        <item>Accessory</item>
+        <item>Other</item>
     </string-array>
 </resources>

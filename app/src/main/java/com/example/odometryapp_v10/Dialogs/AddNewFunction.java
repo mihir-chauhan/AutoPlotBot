@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,6 +29,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
     int numberOfParameters = 0;
     View view;
     boolean canRemoveFromSavedParametersArrayList = false;
+    boolean drivetrainFunctionProtocol = false;
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
@@ -37,10 +39,31 @@ public class AddNewFunction extends AppCompatDialogFragment {
         listView = view.findViewById(R.id.addNewFunctionListView);
         functionName = view.findViewById(R.id.addNewFunctionName);
         final ArrayList<ArrayList<Object>> allParameters = new ArrayList<>();
+        final Spinner functionTypeSelector = view.findViewById(R.id.functionTypeSelector);
 
         final CustomListViewAdapter adapter = new CustomListViewAdapter();
 
         listView.setAdapter(adapter);
+
+        functionTypeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position == 1) {
+                    numberOfParameters = 2;
+                    drivetrainFunctionProtocol = true;
+                    adapter.notifyDataSetChanged();
+                } else {
+                    numberOfParameters = 0;
+                    drivetrainFunctionProtocol = false;
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
 
         builder.setView(view).setTitle("Add New Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -58,7 +81,10 @@ public class AddNewFunction extends AppCompatDialogFragment {
                 }
                 //TODO: add validator for spinners and parameter names to make sure they are not empty
                 if (!functionName.getText().toString().isEmpty()) {
-                    listener.addNewFunction(functionName.getText().toString(), allParameters);
+                    if(drivetrainFunctionProtocol) {
+
+                    }
+                    listener.addNewFunction(functionName.getText().toString(), allParameters, functionTypeSelector.getSelectedItem().toString());
                 } else {
                     Toast.makeText(view.getContext(), "Unable to add new function", Toast.LENGTH_SHORT).show();
                 }
@@ -76,7 +102,6 @@ public class AddNewFunction extends AppCompatDialogFragment {
                         savedParameters.add(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView)));
                     }
                 }
-                System.out.println("SAVED_PARAMS: " + savedParameters);
                 numberOfParameters++;
                 canRemoveFromSavedParametersArrayList = false;
                 adapter.notifyDataSetChanged();
@@ -118,7 +143,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
 
 
     public interface addNewFunctionListener {
-        void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters);
+        void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType);
     }
 
     ArrayList<String> savedParameters = new ArrayList<>();
@@ -153,7 +178,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
             ViewHolder holder;
 
             if (convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.edit_function_custom_listview_layout, null);
+                convertView = getLayoutInflater().inflate(R.layout.add_function_custom_listview_layout, null);
                 holder = new ViewHolder();
                 holder.editText = convertView.findViewById(R.id.parameterInfo);
                 holder.spinner = convertView.findViewById(R.id.parameterType);
@@ -162,11 +187,34 @@ public class AddNewFunction extends AppCompatDialogFragment {
                 holder = (ViewHolder) convertView.getTag();
             }
 
+            if(drivetrainFunctionProtocol) {
+                if(position == 0) {
+                    holder.editText.setText("x");
+                    holder.spinner.setSelection(3);
+                    holder.editText.setEnabled(false);
+                    holder.spinner.setEnabled(false);
+                } else if(position == 1) {
+                    holder.editText.setText("y");
+                    holder.spinner.setSelection(3);
+                    holder.editText.setEnabled(false);
+                    holder.spinner.setEnabled(false);
+                } else {
+                    holder.editText.setEnabled(true);
+                    holder.spinner.setEnabled(true);
+                    holder.spinner.setSelection(0);
+                    try {
+                        holder.editText.setText(savedParameters.get(position));
+                    } catch (Exception e) {
+                        holder.editText.setText("");
+                    }
+                }
+                return convertView;
+            }
+
             try {
                 holder.editText.setText(savedParameters.get(position));
             } catch (Exception e) {
                 holder.editText.setText("");
-                System.out.println("unable to get for: " + position);
             }
 
             return convertView;

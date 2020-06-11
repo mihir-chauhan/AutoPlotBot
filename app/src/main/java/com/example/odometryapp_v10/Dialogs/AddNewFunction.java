@@ -76,17 +76,24 @@ public class AddNewFunction extends AppCompatDialogFragment {
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (numberOfParameters >= 1) {
                     for (int position = 0; position < numberOfParameters; position++) {
+                        if(adapter.getInfoFromView(adapter.getViewByPosition(position, listView)).get(0).toString().equals("") ||
+                                adapter.getInfoFromView(adapter.getViewByPosition(position, listView)).get(1).toString().equals("Parameter Type")) {
+                            Toast.makeText(getContext(), "One or more parameter fields are blank", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         allParameters.add(adapter.getInfoFromView(adapter.getViewByPosition(position, listView)));
                     }
                 }
                 //TODO: add validator for spinners and parameter names to make sure they are not empty
                 if (!functionName.getText().toString().isEmpty()) {
-                    if(drivetrainFunctionProtocol) {
-
+                    if(functionTypeSelector.getSelectedItemPosition() == 0) {
+                        Toast.makeText(getContext(), "Function type is undefined", Toast.LENGTH_SHORT).show();
+                        return;
                     }
                     listener.addNewFunction(functionName.getText().toString(), allParameters, functionTypeSelector.getSelectedItem().toString());
                 } else {
-                    Toast.makeText(view.getContext(), "Unable to add new function", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Function name is undefined", Toast.LENGTH_SHORT).show();
+                    return;
                 }
             }
         });

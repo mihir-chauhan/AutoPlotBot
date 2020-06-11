@@ -53,10 +53,8 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         view = inflater.inflate(R.layout.call_function_dialog, null);
         listView = view.findViewById(R.id.callFunctionListView);
         listView.setAdapter(adapter);
-//        if (1 == 2) {
-            listView.setDivider(null);
-            listView.setDividerHeight(0);
-//        }
+        listView.setDivider(null);
+        listView.setDividerHeight(0);
         initializeDialogComponents();
 
 
@@ -68,7 +66,27 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         }).setPositiveButton("done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                listener.callFunction();
+                if(functionSelectorSpinner.getSelectedItemPosition() == 0) {
+                    Toast.makeText(getContext(), "No function is being called", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                ArrayList<ArrayList<Object>> parametersArray = new ArrayList<>();
+                for (int parameters = 0; parameters < numberOfParameters; parameters++) {
+                    ArrayList<Object> individualParameters = new ArrayList<>();
+                    individualParameters.add(parameterNames.get(parameters));
+                    if(parameterTypes.get(parameters).equals("Boolean")) {
+                        individualParameters.add(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), true));
+                    } else {
+                        if(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false).equals("")) {
+                            Toast.makeText(getContext(), "One or more fields are blank", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        individualParameters.add(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false));
+                    }
+
+                    parametersArray.add(individualParameters);
+                }
+                listener.callFunction(parametersArray);
             }
         });
 
@@ -99,7 +117,6 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     }
 
 
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -113,7 +130,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
 
     public interface callFunctionListener {
-        void callFunction();
+        void callFunction(ArrayList<ArrayList<Object>> functionParameters);
     }
 
     String selectedFunctionName;
@@ -122,7 +139,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        if(position >= 1) {
+        if (position >= 1) {
             String functionName = allFunctionNames.get(functionSelectorSpinner.getSelectedItemPosition() - 1);
             selectedFunctionName = functionName;
             try {
@@ -211,17 +228,17 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
             holder.editText.setVisibility(View.INVISIBLE);
             holder.booleanSwitch.setVisibility(View.INVISIBLE);
 
-            if(parameterTypes.get(position).equals(ParameterTypes.Boolean.toString())) {
+            if (parameterTypes.get(position).equals(ParameterTypes.Boolean.toString())) {
                 holder.booleanSwitch.setVisibility(View.VISIBLE);
                 holder.booleanSwitch.setText(parameterNames.get(position).substring(0, 1).toUpperCase() + parameterNames.get(position).substring(1));
             } else {
                 holder.editText.setVisibility(View.VISIBLE);
                 holder.editText.setHint(parameterNames.get(position).substring(0, 1).toUpperCase() + parameterNames.get(position).substring(1));
-                if(parameterTypes.get(position).equals(ParameterTypes.String.toString())) {
+                if (parameterTypes.get(position).equals(ParameterTypes.String.toString())) {
                     holder.editText.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
-                } else if(parameterTypes.get(position).equals(ParameterTypes.Integer.toString())) {
+                } else if (parameterTypes.get(position).equals(ParameterTypes.Integer.toString())) {
                     holder.editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-                } else if(parameterTypes.get(position).equals(ParameterTypes.Double.toString())) {
+                } else if (parameterTypes.get(position).equals(ParameterTypes.Double.toString())) {
                     holder.editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 }
 
@@ -247,8 +264,12 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
             return parameterName.getText().toString();
         }
 
-        public String getParameterNamesFromView(View view) {
-            return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
+        public String getParameterNamesFromView(View view, boolean isBoolean) {
+            if(!isBoolean) {
+                return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
+            } else {
+                return Boolean.toString(((Switch) view.findViewById(R.id.booleanSwitch)).isChecked());
+            }
         }
     }
 

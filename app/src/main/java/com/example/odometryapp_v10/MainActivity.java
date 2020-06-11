@@ -112,8 +112,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     @Override
-    public void callFunction() {
-
+    public void callFunction(ArrayList<ArrayList<Object>> functionParameters) {
+        System.out.println("FUNCTIONPARAMETERS: " + functionParameters);
     }
 
     @Override

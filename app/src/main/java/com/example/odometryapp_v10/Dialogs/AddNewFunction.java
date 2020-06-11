@@ -26,7 +26,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
     private addNewFunctionListener listener;
     EditText functionName;
     ListView listView;
-    int numberOfParameters = 0;
+    int numberOfParameters = 1;
     View view;
     ArrayList<ArrayList<Object>> allParameters = new ArrayList<>();
 
@@ -42,6 +42,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
 
         listView.setAdapter(adapter);
 
+
         builder.setView(view).setTitle("Add New Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -56,7 +57,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
                     }
                 }
                 //TODO: add validator for spinners and parameter names to make sure they are not empty
-                if(!functionName.getText().toString().isEmpty()) {
+                if (!functionName.getText().toString().isEmpty()) {
                     listener.addNewFunction(functionName.getText().toString(), allParameters);
                 } else {
                     Toast.makeText(view.getContext(), "Unable to add new function", Toast.LENGTH_SHORT).show();
@@ -70,8 +71,9 @@ public class AddNewFunction extends AppCompatDialogFragment {
             @Override
             public void onClick(View v) {
                 numberOfParameters++;
+                EditText editText = adapter.getViewByPosition(numberOfParameters-1, listView).findViewById(R.id.parameterInfo);
+                editText.setHint("jnf;af;djfjeq");
                 adapter.notifyDataSetChanged();
-
             }
         });
 
@@ -89,8 +91,6 @@ public class AddNewFunction extends AppCompatDialogFragment {
 
             }
         });
-
-
         return builder.create();
     }
 

@@ -12,6 +12,7 @@ import android.view.View;
 
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
+import com.example.odometryapp_v10.Dialogs.EditFunction;
 import com.github.clans.fab.FloatingActionButton;
 
 import org.json.JSONArray;
@@ -19,7 +20,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener {
+public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +49,15 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             }
         });
 
+        FloatingActionButton editFunction = findViewById(R.id.editFunction);
+        editFunction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditFunction editFunction = new EditFunction();
+                editFunction.setCancelable(false);
+                editFunction.show(getSupportFragmentManager(), "editFunction");
+            }
+        });
     }
 
 
@@ -103,5 +113,10 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     @Override
     public void callFunction(ArrayList<Object> functionInfo) {
         System.out.println("RECEIVED DATA: " + functionInfo);
+    }
+
+    @Override
+    public void editFunction(ArrayList<Object> functionInfo) {
+
     }
 }

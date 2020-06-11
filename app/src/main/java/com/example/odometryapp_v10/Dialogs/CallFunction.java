@@ -6,10 +6,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
@@ -24,8 +26,6 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.example.odometryapp_v10.JSON;
 import com.example.odometryapp_v10.R;
-
-import net.yslibrary.android.keyboardvisibilityevent.util.UIUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -202,18 +202,17 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
             RelativeLayout listLayout = new RelativeLayout(this.getContext());
             listLayout.setLayoutParams(new AbsListView.LayoutParams(
                     AbsListView.LayoutParams.WRAP_CONTENT,
                     75));
 
-            EditText editText = new EditText(this.getContext());
+            final EditText editText = new EditText(this.getContext());
             editText.setWidth(500);
             editText.setHint(parameterNames[position].substring(0, 1).toUpperCase() + parameterNames[position].substring(1));
             editText.setId(position);
-            editText.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(editText, InputMethodManager.SHOW_FORCED);
+            editText.setFocusableInTouchMode(true);
 
             Switch booleanSwitch = new Switch(this.getContext());
             booleanSwitch.setWidth(500);
@@ -228,11 +227,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
             } else if (super.getItem(position) == ParameterTypes.Boolean.toString()) {
                 booleanSwitch.setChecked(false);
             }
-            if (super.getItem(position) != ParameterTypes.Boolean.toString()) {
-                listLayout.addView(editText);
-                UIUtil.showKeyboard(getContext(), editText);
-                return listLayout;
-            }
+
 
             listLayout.addView(booleanSwitch);
             return listLayout;

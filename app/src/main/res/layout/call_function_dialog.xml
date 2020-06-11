@@ -8,8 +8,14 @@
         android:id="@+id/functionSelector"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
+        android:hint="Function Name"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:hint="Function Name"
-        android:inputType="textAutoCorrect" />
+        android:inputType="textAutoCorrect"
+        android:visibility="invisible"/>
 
     <TextView
         android:layout_width="290dp"

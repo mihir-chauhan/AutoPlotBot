@@ -6,23 +6,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.example.odometryapp_v10.JSON;
@@ -37,55 +34,48 @@ import java.util.List;
 
 public class CallFunction extends AppCompatDialogFragment implements AdapterView.OnItemSelectedListener {
     private callFunctionListener listener;
-    private Spinner functionSelectorSpinner;
-    private View view;
-    final List<String> allFunctionNames = new ArrayList<>();
     ListView listView;
-    String selectedFunctionName;
-    CallFunctionListViewAdapter adapter;
+    int numberOfParameters = 0;
+    View view;
+    Spinner functionSelectorSpinner;
+    ArrayList<String> allFunctionNames = new ArrayList<>();
+    CustomListViewAdapter adapter = new CustomListViewAdapter();
 
     private enum ParameterTypes {
         String, Integer, Double, Boolean
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final LayoutInflater inflater = getActivity().getLayoutInflater();
         view = inflater.inflate(R.layout.call_function_dialog, null);
-        initalizeCallFunctionsDialogContents(view);
+        listView = view.findViewById(R.id.callFunctionListView);
+        listView.setAdapter(adapter);
+//        if (1 == 2) {
+            listView.setDivider(null);
+            listView.setDividerHeight(0);
+//        }
+        initializeDialogComponents();
+
 
         builder.setView(view).setTitle("Call Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+
             }
         }).setPositiveButton("done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                try {
-                    ArrayList<Object> functionInfo = new ArrayList<>();
-                    JSONArray jsonArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
-                    for (int x = 0; x < jsonArray.getJSONObject(returnPositionFromJSONArray(jsonArray, selectedFunctionName)).getJSONObject("parameters").length(); x++) {
-                        functionInfo.add(adapter.getValuesFromView(x));
-                    }
-                    listener.callFunction(functionInfo);
-                } catch (Exception e) {
-                    listener.callFunction(null);
-                }
+                listener.callFunction();
             }
         });
+
         return builder.create();
     }
 
-    private void initalizeCallFunctionsDialogContents(final View view) {
-        listView = view.findViewById(R.id.callFunctionListView);
-        listView.setDivider(null);
-        listView.setDividerHeight(0);
-        String[] parameterTypes = new String[]{};
-        String[] parameterNames = new String[]{};
-        adapter = new CallFunctionListViewAdapter(this.getContext(), parameterTypes, parameterNames);
-        listView.setAdapter(adapter);
 
+    private void initializeDialogComponents() {
         functionSelectorSpinner = view.findViewById(R.id.functionSelector);
         List<String> spinnerArray = new ArrayList<>();
         spinnerArray.add("Select A Function To Call");
@@ -107,42 +97,62 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         functionSelectorSpinner.setOnItemSelectedListener(this);
     }
 
-    private void updateListViewFromSelection(final ListView listView, final Context context) {
-        String functionName = allFunctionNames.get(functionSelectorSpinner.getSelectedItemPosition() - 1);
-        selectedFunctionName = functionName;
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
         try {
-            JSONArray jsonArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
-            if (jsonArray != null) {
-                int i = returnPositionFromJSONArray(jsonArray, functionName);
-                if (i != -1) {
-                    ArrayList<String> parameterTypes = new ArrayList<>();
-                    ArrayList<String> parameterNames = new ArrayList<>();
-                    Iterator<String> keys = jsonArray.getJSONObject(i).getJSONObject("parameters").keys();
-
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        try {
-                            parameterNames.add(key);
-                            parameterTypes.add(jsonArray.getJSONObject(i).getJSONObject("parameters").get(key).toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    //image_urls.toArray(new String[image_urls.size()]);
-                    final String[] parameterNamesArray = parameterNames.toArray(new String[parameterNames.size()]);
-                    final String[] parameterTypesArray = parameterTypes.toArray(new String[parameterTypes.size()]);
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            listView.setAdapter(new CallFunctionListViewAdapter(context, parameterTypesArray, parameterNamesArray));
-                        }
-                    });
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+            listener = (callFunctionListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + "must implement pathListener");
         }
+    }
+
+
+    public interface callFunctionListener {
+        void callFunction();
+    }
+
+    String selectedFunctionName;
+    ArrayList<String> parameterNames = new ArrayList<>();
+    ArrayList<String> parameterTypes = new ArrayList<>();
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        if(position >= 1) {
+            String functionName = allFunctionNames.get(functionSelectorSpinner.getSelectedItemPosition() - 1);
+            selectedFunctionName = functionName;
+            try {
+                JSONArray jsonArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
+                if (jsonArray != null) {
+                    int i = returnPositionFromJSONArray(jsonArray, functionName);
+                    if (i != -1) {
+                        parameterTypes.clear();
+                        parameterNames.clear();
+                        Iterator<String> keys = jsonArray.getJSONObject(i).getJSONObject("parameters").keys();
+
+                        while (keys.hasNext()) {
+                            String key = keys.next();
+                            try {
+                                parameterNames.add(key);
+                                parameterTypes.add(jsonArray.getJSONObject(i).getJSONObject("parameters").get(key).toString());
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        System.out.println("numberOfParameters: " + parameterNames.size());
+                        numberOfParameters = parameterNames.size();
+                    }
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            numberOfParameters = 0;
+        }
+        adapter.notifyDataSetChanged();
     }
 
     public Integer returnPositionFromJSONArray(JSONArray jsonArray, String name) {
@@ -159,97 +169,82 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> parent, final View view, int position, long id) {
-        if (functionSelectorSpinner.getSelectedItemPosition() == 0) {
-            final String[] parameterNamesArray = new String[]{};
-            final String[] parameterTypesArray = new String[]{};
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    listView.setAdapter(new CallFunctionListViewAdapter(view.getContext(), parameterTypesArray, parameterNamesArray));
-                }
-            });
-        } else {
-            updateListViewFromSelection(listView, view.getContext());
-        }
-    }
-
-    @Override
     public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        try {
-            listener = (callFunctionListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + "must implement pathListener");
-        }
-    }
-
-    public interface callFunctionListener {
-        void callFunction(ArrayList<Object> functionInfo);
-    }
-
-    private class CallFunctionListViewAdapter extends ArrayAdapter<String> {
-        private String[] parameterNames;
-
-        public CallFunctionListViewAdapter(Context context, String[] typeOfParameters, String[] parameterNames) {
-            super(context, -1, -1, typeOfParameters);
-            this.parameterNames = parameterNames;
+    class CustomListViewAdapter extends BaseAdapter {
+        @Override
+        public int getCount() {
+            return numberOfParameters;
         }
 
         @Override
-        public View getView(int position, View convertView, @Nullable ViewGroup parent) {
+        public Object getItem(int position) {
+            if (numberOfParameters >= 1) {
+                EditText parameterName = view.findViewById(R.id.callFunctionParameterInput);
+                return parameterName.getText();
+            }
+            return null;
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.call_function_custom_listview_layout, null);
+                holder = new ViewHolder();
+                holder.editText = convertView.findViewById(R.id.callFunctionParameterInput);
+                holder.booleanSwitch = convertView.findViewById(R.id.booleanSwitch);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
             getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-            RelativeLayout listLayout = new RelativeLayout(this.getContext());
-            listLayout.setLayoutParams(new AbsListView.LayoutParams(
-                    AbsListView.LayoutParams.WRAP_CONTENT,
-                    75));
 
-            final EditText editText = new EditText(this.getContext());
-            editText.setWidth(500);
-            editText.setHint(parameterNames[position].substring(0, 1).toUpperCase() + parameterNames[position].substring(1));
-            editText.setId(position);
-            editText.setFocusableInTouchMode(true);
+            holder.editText.setVisibility(View.INVISIBLE);
+            holder.booleanSwitch.setVisibility(View.INVISIBLE);
 
-            Switch booleanSwitch = new Switch(this.getContext());
-            booleanSwitch.setWidth(500);
-            booleanSwitch.setText(parameterNames[position]);
-
-            if (super.getItem(position) == ParameterTypes.String.toString()) {
-                editText.setInputType(InputType.TYPE_CLASS_TEXT);
-            } else if (super.getItem(position) == ParameterTypes.Integer.toString()) {
-                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-            } else if (super.getItem(position) == ParameterTypes.Double.toString()) {
-                editText.setInputType(InputType.TYPE_NUMBER_FLAG_DECIMAL);
-            } else if (super.getItem(position) == ParameterTypes.Boolean.toString()) {
-                booleanSwitch.setChecked(false);
+            if(parameterTypes.get(position).equals(ParameterTypes.Boolean.toString())) {
+                holder.booleanSwitch.setVisibility(View.VISIBLE);
+                holder.booleanSwitch.setText(parameterNames.get(position));
+            } else {
+                holder.editText.setVisibility(View.VISIBLE);
+                holder.editText.setHint(parameterNames.get(position));
             }
 
-
-            listLayout.addView(booleanSwitch);
-            return listLayout;
-
+            return convertView;
         }
 
-        public ArrayList<Object> getValuesFromView(int position) {
-            ArrayList<Object> functionInfo = new ArrayList<>();
-            EditText editText = null;
-            Switch aSwitch = null;
-            try {
-                editText = view.findViewById(position);
-            } catch (Exception e) {
-                aSwitch = view.findViewById(position);
+        public View getViewByPosition(int pos, ListView listView) {
+            final int firstListItemPosition = listView.getFirstVisiblePosition();
+            final int lastListItemPosition = firstListItemPosition + listView.getChildCount() - 1;
+
+            if (pos < firstListItemPosition || pos > lastListItemPosition) {
+                return listView.getAdapter().getView(pos, null, listView);
+            } else {
+                final int childIndex = pos - firstListItemPosition;
+                return listView.getChildAt(childIndex);
             }
-            if (editText != null && !editText.getText().toString().isEmpty()) {
-                functionInfo.add(editText.getText().toString());
-            } else if (aSwitch != null) {
-                functionInfo.add(aSwitch.isChecked());
-            }
-            return functionInfo;
         }
+
+        public String getInfoFromView(View view) {
+            EditText parameterName = view.findViewById(R.id.callFunctionParameterInput);
+            return parameterName.getText().toString();
+        }
+
+        public String getParameterNamesFromView(View view) {
+            return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
+        }
+    }
+
+    public static class ViewHolder {
+        EditText editText;
+        Switch booleanSwitch;
     }
 }

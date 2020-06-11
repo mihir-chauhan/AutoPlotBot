@@ -111,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     @Override
-    public void callFunction(ArrayList<Object> functionInfo) {
-        System.out.println("RECEIVED DATA: " + functionInfo);
+    public void callFunction() {
+
     }
 
     @Override

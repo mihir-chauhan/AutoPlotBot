@@ -8,17 +8,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDialogFragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.odometryapp_v10.R;
 
@@ -156,7 +153,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
             ViewHolder holder;
 
             if (convertView == null) {
-                convertView = getLayoutInflater().inflate(R.layout.custom_listview_layout, null);
+                convertView = getLayoutInflater().inflate(R.layout.edit_function_custom_listview_layout, null);
                 holder = new ViewHolder();
                 holder.editText = convertView.findViewById(R.id.parameterInfo);
                 holder.spinner = convertView.findViewById(R.id.parameterType);

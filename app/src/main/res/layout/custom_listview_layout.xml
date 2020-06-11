@@ -13,7 +13,7 @@
         android:autoSizeMinTextSize="1sp"
         android:autoSizeMaxTextSize="50sp"
         android:autoSizeStepGranularity="1sp"
-        android:hint="ParameterName"/>
+        android:hint="Parameter Name"/>
 
     <Spinner
         android:id="@+id/parameterType"

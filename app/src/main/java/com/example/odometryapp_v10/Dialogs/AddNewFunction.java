@@ -14,9 +14,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.odometryapp_v10.R;
 
@@ -26,17 +28,18 @@ public class AddNewFunction extends AppCompatDialogFragment {
     private addNewFunctionListener listener;
     EditText functionName;
     ListView listView;
-    int numberOfParameters = 1;
+    int numberOfParameters = 0;
     View view;
-    ArrayList<ArrayList<Object>> allParameters = new ArrayList<>();
+    boolean canRemoveFromSavedParametersArrayList = false;
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
+    public Dialog onCreateDialog(final Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final LayoutInflater inflater = getActivity().getLayoutInflater();
         view = inflater.inflate(R.layout.add_function_dialog, null);
         listView = view.findViewById(R.id.addNewFunctionListView);
         functionName = view.findViewById(R.id.addNewFunctionName);
+        final ArrayList<ArrayList<Object>> allParameters = new ArrayList<>();
 
         final CustomListViewAdapter adapter = new CustomListViewAdapter();
 
@@ -70,9 +73,15 @@ public class AddNewFunction extends AppCompatDialogFragment {
         addParameters.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (numberOfParameters >= 1) {
+                    savedParameters.clear();
+                    for(int parameters = 0; parameters < numberOfParameters; parameters++) {
+                        savedParameters.add(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView)));
+                    }
+                }
+                System.out.println("SAVED_PARAMS: " + savedParameters);
                 numberOfParameters++;
-                EditText editText = adapter.getViewByPosition(numberOfParameters-1, listView).findViewById(R.id.parameterInfo);
-                editText.setHint("jnf;af;djfjeq");
+                canRemoveFromSavedParametersArrayList = false;
                 adapter.notifyDataSetChanged();
             }
         });
@@ -82,8 +91,13 @@ public class AddNewFunction extends AppCompatDialogFragment {
         removeParameters.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if(canRemoveFromSavedParametersArrayList) {
+                    savedParameters.remove(savedParameters.size() - 1);
+                }
+
                 if (numberOfParameters > 0) {
                     numberOfParameters--;
+                    canRemoveFromSavedParametersArrayList = true;
                     adapter.notifyDataSetChanged();
                 } else {
                     Toast.makeText(view.getContext(), "Unable to remove parameters", Toast.LENGTH_SHORT).show();
@@ -110,6 +124,8 @@ public class AddNewFunction extends AppCompatDialogFragment {
         void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters);
     }
 
+    ArrayList<String> savedParameters = new ArrayList<>();
+
 
     class CustomListViewAdapter extends BaseAdapter {
         @Override
@@ -119,14 +135,14 @@ public class AddNewFunction extends AppCompatDialogFragment {
 
         @Override
         public Object getItem(int position) {
-//            if(numberOfParameters >= 1) {
-//                ArrayList<Object> parameter = new ArrayList<>();
-//                EditText parameterName = view.findViewById(R.id.parameterInfo);
-//                parameter.add(parameterName.getText().toString());
-//                Spinner parameterType = view.findViewById(R.id.parameterType);
-//                parameter.add(parameterType.getSelectedItem());
-//                return parameter;
-//            }
+            if (numberOfParameters >= 1) {
+                ArrayList<Object> parameter = new ArrayList<>();
+                EditText parameterName = view.findViewById(R.id.parameterInfo);
+                parameter.add(parameterName.getText().toString());
+                Spinner parameterType = view.findViewById(R.id.parameterType);
+                parameter.add(parameterType.getSelectedItem());
+                return parameter;
+            }
             return null;
         }
 
@@ -137,8 +153,25 @@ public class AddNewFunction extends AppCompatDialogFragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            getItem(position);
-            convertView = getLayoutInflater().inflate(R.layout.custom_listview_layout, null);
+            ViewHolder holder;
+
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(R.layout.custom_listview_layout, null);
+                holder = new ViewHolder();
+                holder.editText = convertView.findViewById(R.id.parameterInfo);
+                holder.spinner = convertView.findViewById(R.id.parameterType);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            try {
+                holder.editText.setText(savedParameters.get(position));
+            } catch (Exception e) {
+                holder.editText.setText("");
+                System.out.println("unable to get for: " + position);
+            }
+
             return convertView;
         }
 
@@ -162,5 +195,14 @@ public class AddNewFunction extends AppCompatDialogFragment {
             parameterArray.add(parameterType.getSelectedItem().toString());
             return parameterArray;
         }
+
+        public String getParameterNamesFromView(View view) {
+            return ((EditText) view.findViewById(R.id.parameterInfo)).getText().toString();
+        }
+    }
+
+    public static class ViewHolder {
+        EditText editText;
+        Spinner spinner;
     }
 }

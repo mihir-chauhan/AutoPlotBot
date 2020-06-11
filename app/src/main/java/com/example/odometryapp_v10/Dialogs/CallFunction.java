@@ -22,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.example.odometryapp_v10.JSON;
@@ -201,7 +202,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(int position, View convertView, @Nullable ViewGroup parent) {
             getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
             RelativeLayout listLayout = new RelativeLayout(this.getContext());
             listLayout.setLayoutParams(new AbsListView.LayoutParams(

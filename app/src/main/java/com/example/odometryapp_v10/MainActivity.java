@@ -1,10 +1,16 @@
 package com.example.odometryapp_v10;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.ClipData;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
@@ -14,6 +20,8 @@ import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
 import com.example.odometryapp_v10.Dialogs.EditFunction;
 import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,8 +30,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener {
-    FloatingActionButton callFunction;
-    FloatingActionButton editFunction;
+    com.github.sealstudios.fab.FloatingActionButton callFunction;
+    com.github.sealstudios.fab.FloatingActionButton editFunction;
+
+    private RecyclerView recyclerView;
+    private RecyclerViewAdapter recyclerViewAdapter;
+    private RecyclerView.LayoutManager recyclerViewLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +44,51 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
         checkForWritePermission();
 
-        FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
+
+        final ArrayList<RecyclerViewItem> recyclerViewItemArrayList = new ArrayList<>();
+        recyclerViewItemArrayList.add(new RecyclerViewItem("Move To Position", "X: 12, Y: 25, Direction: true"));
+        recyclerViewItemArrayList.add(new RecyclerViewItem("Strafe To Position", "X: 12, Y: 25, Direction: true"));
+        recyclerViewItemArrayList.add(new RecyclerViewItem("Turn", "Heading: 90, Power: 10"));
+
+        recyclerView = findViewById(R.id.programFunctionsRecyclerView);
+        recyclerView.setHasFixedSize(true);
+        recyclerViewLayoutManager = new LinearLayoutManager(this);
+        recyclerViewAdapter = new RecyclerViewAdapter(recyclerViewItemArrayList);
+        recyclerView.setLayoutManager(recyclerViewLayoutManager);
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerViewAdapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+                System.out.println("ksjdnlanf: " + position);
+            }
+        });
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return true;
+            }
+
+            @Override
+            public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
+                final int deletedColumnPosition = viewHolder.getAdapterPosition();
+                final RecyclerViewItem currentItem = recyclerViewItemArrayList.get(deletedColumnPosition);
+                CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinator);
+                Snackbar snackbar = Snackbar.make(coordinatorLayout, "Function deleted", Snackbar.LENGTH_SHORT)
+                        .setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                recyclerViewItemArrayList.add(deletedColumnPosition, currentItem);
+                                recyclerViewAdapter.notifyDataSetChanged();
+                            }
+                        });
+                snackbar.show();
+                recyclerViewItemArrayList.remove(deletedColumnPosition);
+                recyclerViewAdapter.notifyDataSetChanged();
+            }
+        }).attachToRecyclerView(recyclerView);
+
+        com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
         addNewFunction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

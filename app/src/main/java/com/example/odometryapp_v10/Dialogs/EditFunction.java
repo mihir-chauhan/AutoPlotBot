@@ -84,7 +84,6 @@ public class EditFunction extends AppCompatDialogFragment implements AdapterView
                         allParameters.add(adapter.getInfoFromView(adapter.getViewByPosition(position, listView)));
                     }
                 }
-                //TODO: add validator for spinners and parameter names to make sure they are not empty
                 if (!editFunctionName.getText().toString().isEmpty()) {
                     if(editFunctionSelectorSpinner.getSelectedItemPosition() == 0) {
                         Toast.makeText(getContext(), "Function name is undefined", Toast.LENGTH_SHORT).show();

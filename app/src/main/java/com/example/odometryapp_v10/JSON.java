@@ -104,6 +104,22 @@ public class JSON {
         return null;
     }
 
+    public static boolean doesFileExist(String fileName, @Nullable String filePath) {
+        if (!fileName.contains(".txt")) {
+            fileName += ".txt";
+        }
+        StringBuilder sb = new StringBuilder();
+        try {
+            File textFile = new File(filePath, fileName);
+            if (filePath == null) {
+                textFile = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/", fileName);
+            }
+            return textFile.exists();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public static void appendJSONToTextFile(String fileName, @Nullable String filePath, @Nullable JSONObject jsonObject, @Nullable JSONArray jsonArray, JSONArchitecture fileArchitecture) {
         JSONObject fileContents = null;
         try {

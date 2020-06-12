@@ -24,6 +24,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener {
     FloatingActionButton callFunction;
     FloatingActionButton editFunction;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,19 +61,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 editFunction.show(getSupportFragmentManager(), "editFunction");
             }
         });
-
-        try {
-            if(JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function").length() >= 1) {
-                callFunction.setEnabled(true);
-                editFunction.setEnabled(true);
-            } else {
-                callFunction.setEnabled(false);
-                editFunction.setEnabled(false);
-            }
-        } catch (Exception ignore) {
-            callFunction.setEnabled(false);
-            editFunction.setEnabled(false);
-        }
+        canRunFABThread = true;
+        enableOrDisableFAButtons();
     }
 
 
@@ -107,6 +97,53 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     }
 
+    private boolean canRunFABThread;
+    private Thread fabuttonThread;
+
+    private void enableOrDisableFAButtons() {
+        fabuttonThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (canRunFABThread) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (JSON.doesFileExist("functions", Environment.getExternalStorageDirectory() + "/Documents/")) {
+                                try {
+                                    if (JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function").length() >= 1) {
+                                        callFunction.setEnabled(true);
+                                        editFunction.setEnabled(true);
+                                    } else {
+                                        callFunction.setEnabled(false);
+                                        editFunction.setEnabled(false);
+                                    }
+                                } catch (Exception ignore) {
+                                    callFunction.setEnabled(false);
+                                    editFunction.setEnabled(false);
+                                }
+                            }
+                        }
+                    });
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        fabuttonThread.setName("Floating Action Bar Button Thread");
+        fabuttonThread.setPriority(Thread.MIN_PRIORITY);
+        fabuttonThread.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        canRunFABThread = false;
+        fabuttonThread.interrupt();
+        super.onDestroy();
+    }
+
     @Override
     public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType) {
         try {
@@ -114,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             jsonObject.put("functionName", functionName);
             jsonObject.put("functionType", functionType);
             JSONObject paramObject = new JSONObject();
-            for(int parameter = 0; parameter < allParameters.size(); parameter++) {
+            for (int parameter = 0; parameter < allParameters.size(); parameter++) {
                 paramObject.put(allParameters.get(parameter).get(0).toString(), allParameters.get(parameter).get(1).toString());
             }
 
@@ -123,10 +160,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             JSON.appendJSONToTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", jsonObject, null, JSON.JSONArchitecture.Function_Notation);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-        if(!callFunction.isEnabled() && !editFunction.isEnabled()) {
-            callFunction.setEnabled(true);
-            editFunction.setEnabled(true);
         }
     }
 
@@ -142,13 +175,13 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             jsonObject.put("functionName", functionName);
             jsonObject.put("functionType", functionType);
             JSONObject paramObject = new JSONObject();
-            for(int parameter = 0; parameter < allParameters.size(); parameter++) {
+            for (int parameter = 0; parameter < allParameters.size(); parameter++) {
                 paramObject.put(allParameters.get(parameter).get(0).toString(), allParameters.get(parameter).get(1).toString());
             }
 
             jsonObject.put("parameters", paramObject);
 
-            JSON.replaceInJSONTextFile("functions", originalFunctionPosition,Environment.getExternalStorageDirectory() + "/Documents/", jsonObject, null, JSON.JSONArchitecture.Function_Notation);
+            JSON.replaceInJSONTextFile("functions", originalFunctionPosition, Environment.getExternalStorageDirectory() + "/Documents/", jsonObject, null, JSON.JSONArchitecture.Function_Notation);
         } catch (Exception e) {
             e.printStackTrace();
         }

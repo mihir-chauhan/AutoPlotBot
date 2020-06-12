@@ -69,6 +69,7 @@ public class EditFunction extends AppCompatDialogFragment implements AdapterView
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
+                JSON.removeFromJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", originalFunctionPosition);
             }
         }).setPositiveButton("done", new DialogInterface.OnClickListener() {
             @Override

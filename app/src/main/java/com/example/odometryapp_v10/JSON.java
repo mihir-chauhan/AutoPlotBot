@@ -182,6 +182,16 @@ public class JSON {
         }
     }
 
+    public static void removeFromJSONTextFile(String fileName, @Nullable String filePath, int positionOfItemForRemoval) {
+        JSONObject fileContents = null;
+        try {
+            fileContents = readJSONTextFile(fileName, filePath);
+        } catch (Exception e) {
+
+        }
+        removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+    }
+
     public static void replaceInJSONTextFile(String fileName, int positionOfItemForRemoval, @Nullable String filePath, @Nullable JSONObject jsonObject, @Nullable JSONArray jsonArray, JSONArchitecture fileArchitecture) {
         JSONObject fileContents = null;
         try {

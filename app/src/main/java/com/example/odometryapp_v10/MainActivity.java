@@ -16,6 +16,7 @@ import com.example.odometryapp_v10.Dialogs.EditFunction;
 import com.github.clans.fab.FloatingActionButton;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -49,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 callFunction.show(getSupportFragmentManager(), "callFunction");
             }
         });
-        callFunction.setEnabled(false);
 
         editFunction = findViewById(R.id.editFunction);
         editFunction.setOnClickListener(new View.OnClickListener() {
@@ -60,7 +60,18 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 editFunction.show(getSupportFragmentManager(), "editFunction");
             }
         });
-        editFunction.setEnabled(false);
+
+        try {
+            if(JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function").length() >= 1) {
+                callFunction.setEnabled(true);
+                editFunction.setEnabled(true);
+            } else {
+                callFunction.setEnabled(false);
+                editFunction.setEnabled(false);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -112,8 +123,10 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         } catch (Exception e) {
             e.printStackTrace();
         }
-        callFunction.setEnabled(true);
-        editFunction.setEnabled(true);
+        if(!callFunction.isEnabled() && !editFunction.isEnabled()) {
+            callFunction.setEnabled(true);
+            editFunction.setEnabled(true);
+        }
     }
 
     @Override

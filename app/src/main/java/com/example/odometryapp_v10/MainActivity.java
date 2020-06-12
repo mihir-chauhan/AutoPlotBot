@@ -69,8 +69,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 callFunction.setEnabled(false);
                 editFunction.setEnabled(false);
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        } catch (Exception ignore) {
+            callFunction.setEnabled(false);
+            editFunction.setEnabled(false);
         }
     }
 

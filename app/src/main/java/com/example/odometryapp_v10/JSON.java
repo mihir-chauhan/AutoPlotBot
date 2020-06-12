@@ -105,8 +105,6 @@ public class JSON {
     }
 
     public static void appendJSONToTextFile(String fileName, @Nullable String filePath, @Nullable JSONObject jsonObject, @Nullable JSONArray jsonArray, JSONArchitecture fileArchitecture) {
-
-
         JSONObject fileContents = null;
         try {
             fileContents = readJSONTextFile(fileName, filePath);
@@ -127,7 +125,6 @@ public class JSON {
             return;
         }
 
-
         try {
             if (jsonArray == null && jsonObject != null) {
                 if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
@@ -137,9 +134,9 @@ public class JSON {
                 }
             } else if (jsonArray != null && jsonObject == null) {
                 if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
-                    fileContents.getJSONArray("program").put(jsonObject);
+                    fileContents.getJSONArray("program").put(jsonArray);
                 } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
-                    fileContents.getJSONArray("function").put(jsonObject);
+                    fileContents.getJSONArray("function").put(jsonArray);
                 }
             } else {
                 throw new NullPointerException("Both @Nullable JSON inputs are NULL -- when appending to existing file");
@@ -161,5 +158,60 @@ public class JSON {
                 ),
                 " "
         );
+    }
+
+    public static void removeInJSONTextFile(String fileName, JSONObject fileContents, int positionOfItemForRemoval, String filePath) {
+        try {
+            JSONArray list = new JSONArray();
+            JSONArray jsonArray = fileContents.getJSONArray("function");
+            int len = jsonArray.length();
+            if (jsonArray != null) {
+                for (int i=0;i<len;i++) {
+                    //Excluding the item at position
+                    if (i != positionOfItemForRemoval)
+                    {
+                        list.put(jsonArray.get(i));
+                    }
+                }
+            }
+            JSONObject jObject = new JSONObject();
+            jObject.put("function", list);
+            writeJSONToTextFile(fileName, filePath, jObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void replaceInJSONTextFile(String fileName, int positionOfItemForRemoval, @Nullable String filePath, @Nullable JSONObject jsonObject, @Nullable JSONArray jsonArray, JSONArchitecture fileArchitecture) {
+        JSONObject fileContents = null;
+        try {
+            fileContents = readJSONTextFile(fileName, filePath);
+        } catch (Exception e) {
+
+        }
+
+        try {
+            if (jsonArray == null && jsonObject != null) {
+                if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
+                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+                    appendJSONToTextFile(fileName, filePath, jsonObject, jsonArray, fileArchitecture);
+                } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
+                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+                    appendJSONToTextFile(fileName, filePath, jsonObject, jsonArray, fileArchitecture);
+                }
+            } else if (jsonArray != null && jsonObject == null) {
+                if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
+                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+                    appendJSONToTextFile(fileName, filePath, jsonObject, jsonArray, fileArchitecture);
+                } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
+                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+                    appendJSONToTextFile(fileName, filePath, jsonObject, jsonArray, fileArchitecture);
+                }
+            } else {
+                throw new NullPointerException("Both @Nullable JSON inputs are NULL -- when appending to existing file");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

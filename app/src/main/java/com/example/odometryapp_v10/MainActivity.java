@@ -21,7 +21,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener {
-
+    FloatingActionButton callFunction;
+    FloatingActionButton editFunction;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             }
         });
 
-        FloatingActionButton callFunction = findViewById(R.id.callFunction);
+        callFunction = findViewById(R.id.callFunction);
         callFunction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,8 +49,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 callFunction.show(getSupportFragmentManager(), "callFunction");
             }
         });
+        callFunction.setEnabled(false);
 
-        FloatingActionButton editFunction = findViewById(R.id.editFunction);
+        editFunction = findViewById(R.id.editFunction);
         editFunction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 editFunction.show(getSupportFragmentManager(), "editFunction");
             }
         });
+        editFunction.setEnabled(false);
     }
 
 
@@ -109,16 +112,31 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         } catch (Exception e) {
             e.printStackTrace();
         }
+        callFunction.setEnabled(true);
+        editFunction.setEnabled(true);
     }
 
     @Override
     public void callFunction(ArrayList<ArrayList<Object>> functionParameters) {
-        System.out.println("FUNCTIONPARAMETERS: " + functionParameters);
+
     }
 
     @Override
-    public void editFunction(ArrayList<Object> functionInfo) {
+    public void editFunction(int originalFunctionPosition, String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("functionName", functionName);
+            jsonObject.put("functionType", functionType);
+            JSONObject paramObject = new JSONObject();
+            for(int parameter = 0; parameter < allParameters.size(); parameter++) {
+                paramObject.put(allParameters.get(parameter).get(0).toString(), allParameters.get(parameter).get(1).toString());
+            }
 
+            jsonObject.put("parameters", paramObject);
 
+            JSON.replaceInJSONTextFile("functions", originalFunctionPosition,Environment.getExternalStorageDirectory() + "/Documents/", jsonObject, null, JSON.JSONArchitecture.Function_Notation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

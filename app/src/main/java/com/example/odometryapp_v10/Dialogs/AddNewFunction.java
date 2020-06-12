@@ -28,8 +28,8 @@ public class AddNewFunction extends AppCompatDialogFragment {
     ListView listView;
     int numberOfParameters = 0;
     View view;
-    boolean canRemoveFromSavedParametersArrayList = false;
     boolean drivetrainFunctionProtocol = false;
+    boolean canRemoveFromSavedParametersArrayList = false;
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {

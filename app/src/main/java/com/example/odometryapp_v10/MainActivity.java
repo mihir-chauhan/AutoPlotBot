@@ -21,19 +21,22 @@ import android.view.WindowManager;
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
 import com.example.odometryapp_v10.Dialogs.EditFunction;
+import com.example.odometryapp_v10.Dialogs.SaveFile;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener {
+public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener, SaveFile.saveFunctionListener {
     com.github.sealstudios.fab.FloatingActionButton callFunction;
     com.github.sealstudios.fab.FloatingActionButton editFunction;
+    com.github.sealstudios.fab.FloatingActionButton saveFunction;
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
@@ -81,10 +84,20 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             }
         });
 
+        saveFunction = findViewById(R.id.saveFile);
+        saveFunction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SaveFile saveFile = new SaveFile();
+                saveFile.setCancelable(false);
+                saveFile.show(getSupportFragmentManager(), "saveFile");
+            }
+        });
+        saveFunction.setEnabled(false);
+
         canRunFABThread = true;
         enableOrDisableFAButtons();
     }
-
 
     private void checkForWritePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -221,6 +234,11 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                                     editFunction.setEnabled(false);
                                 }
                             }
+                            if(recyclerViewItemArrayList.size() >= 1) {
+                                saveFunction.setEnabled(true);
+                            } else {
+                                saveFunction.setEnabled(false);
+                            }
                         }
                     });
                     try {
@@ -328,6 +346,23 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             JSON.replaceInJSONTextFile("functions", originalFunctionPosition, Environment.getExternalStorageDirectory() + "/Documents/", jsonObject, null, JSON.JSONArchitecture.Function_Notation);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void saveFunction(String fileName) {
+        File currentFile = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/" + currentFileName + ".txt");
+        File newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName);
+        if(!fileName.contains(".txt")) {
+            newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName + ".txt");
+        }
+        System.out.println("blahblahblah");
+        System.out.println(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName + ".txt");
+        System.out.println(currentFileName + ".txt");
+        if (currentFile.renameTo(newFileName)) {
+            System.out.println("File renamed successfully");
+        } else {
+            System.out.println("Failed to rename file");
         }
     }
 }

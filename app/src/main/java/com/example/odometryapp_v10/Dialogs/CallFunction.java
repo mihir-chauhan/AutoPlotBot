@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
 import com.example.odometryapp_v10.JSON;
@@ -38,9 +40,11 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     ListView listView;
     int numberOfParameters = 0;
     View view;
-    Spinner functionSelectorSpinner;
+    static Spinner functionSelectorSpinner;
     ArrayList<String> allFunctionNames = new ArrayList<>();
     CustomListViewAdapter adapter = new CustomListViewAdapter();
+    public static boolean canSetSelectionOfFunctionSelector = false;
+    public static boolean isEditingFunction;
 
     private enum ParameterTypes {
         String, Integer, Double, Boolean
@@ -48,6 +52,8 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
+        isEditingFunction = false;
+        canSetSelectionOfFunctionSelector = false;
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final LayoutInflater inflater = getActivity().getLayoutInflater();
         view = inflater.inflate(R.layout.call_function_dialog, null);
@@ -56,6 +62,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         listView.setDivider(null);
         listView.setDividerHeight(0);
         initializeDialogComponents();
+
 
 
         builder.setView(view).setTitle("Call Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -86,11 +93,21 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
                     parametersArray.add(individualParameters);
                 }
-                listener.callFunction(parametersArray);
+                //returns array of format: [["parameterName", "parameterValue"], ["...", "..."], ["...", "..."], ...]
+                listener.callFunction(selectedFunctionName, parametersArray, isSelectedFunctionADrivetrainFunction, isEditingFunction, positionToEDIT);
             }
         });
-
+        canSetSelectionOfFunctionSelector = true;
         return builder.create();
+    }
+
+    public static void populateComponentsForEditing(final int functionSelectorSpinnerPosition) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                functionSelectorSpinner.setSelection(functionSelectorSpinnerPosition);
+            }
+        }, 100);
     }
 
 
@@ -116,6 +133,17 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         functionSelectorSpinner.setOnItemSelectedListener(this);
     }
 
+    private static ArrayList<ArrayList<Object>> parametersIF_EDITING = new ArrayList<>();
+    private static int positionToEDIT;
+
+    public static void setUpFunctionEditing(int editingPosition, ArrayList<ArrayList<Object>> parameters) {
+        isEditingFunction = true;
+        positionToEDIT = editingPosition;
+        parametersIF_EDITING = parameters;
+        CallFunction callFunction = new CallFunction();
+        callFunction.adapter.notifyDataSetChanged();
+    }
+
 
     @Override
     public void onAttach(Context context) {
@@ -130,12 +158,13 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
 
     public interface callFunctionListener {
-        void callFunction(ArrayList<ArrayList<Object>> functionParameters);
+        void callFunction(String functionName, ArrayList<ArrayList<Object>> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int funtionPosition);
     }
 
     String selectedFunctionName;
     ArrayList<String> parameterNames = new ArrayList<>();
     ArrayList<String> parameterTypes = new ArrayList<>();
+    boolean isSelectedFunctionADrivetrainFunction;
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -146,6 +175,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                 JSONArray jsonArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
                 if (jsonArray != null) {
                     int i = returnPositionFromJSONArray(jsonArray, functionName);
+                    isSelectedFunctionADrivetrainFunction = jsonArray.getJSONObject(i).getString("functionType").equals("Drivetrain");
                     if (i != -1) {
                         parameterTypes.clear();
                         parameterNames.clear();
@@ -160,7 +190,6 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                                 e.printStackTrace();
                             }
                         }
-                        System.out.println("numberOfParameters: " + parameterNames.size());
                         numberOfParameters = parameterNames.size();
                     }
                 }
@@ -236,12 +265,25 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                 holder.editText.setHint(parameterNames.get(position).substring(0, 1).toUpperCase() + parameterNames.get(position).substring(1));
                 if (parameterTypes.get(position).equals(ParameterTypes.String.toString())) {
                     holder.editText.setInputType(InputType.TYPE_TEXT_FLAG_AUTO_CORRECT);
-                } else if (parameterTypes.get(position).equals(ParameterTypes.Integer.toString())) {
-                    holder.editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                 } else if (parameterTypes.get(position).equals(ParameterTypes.Double.toString())) {
-                    holder.editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+                    holder.editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL | InputType.TYPE_NUMBER_FLAG_SIGNED);
+                } else if (parameterTypes.get(position).equals(ParameterTypes.Integer.toString())) {
+                    holder.editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
                 }
 
+            }
+
+            if(isEditingFunction) {
+                System.out.println("asdjasjdnfkldjasfnlasdnflakdsjnflsajkdnflasdnflaksnflanfjasnflsadjfnad");
+                if(parametersIF_EDITING.get(position).get(1).toString().equals("true") || parametersIF_EDITING.get(position).get(1).toString().equals("false")) {
+                    if(parametersIF_EDITING.get(position).get(1).toString().equals("true")) {
+                        holder.booleanSwitch.setChecked(true);
+                    } else {
+                        holder.booleanSwitch.setChecked(false);
+                    }
+                } else {
+                    holder.editText.setText(parametersIF_EDITING.get(position).get(1).toString());
+                }
             }
 
             return convertView;

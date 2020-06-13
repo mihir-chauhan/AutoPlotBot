@@ -1,5 +1,6 @@
 package com.example.odometryapp_v10;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public static class RecyclerViewHolder extends RecyclerView.ViewHolder {
         public TextView functionNameTextView;
         public TextView functionParametersTextView;
+
         public RecyclerViewHolder(@NonNull View itemView, final OnItemClickListener listener) {
             super(itemView);
             functionNameTextView = itemView.findViewById(R.id.recyclerViewFunctionNameTextView);
@@ -32,9 +34,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(listener != null) {
+                    if (listener != null) {
                         int position = getAdapterPosition();
-                        if(position != RecyclerView.NO_POSITION) {
+                        if (position != RecyclerView.NO_POSITION) {
                             listener.onItemClick(position);
                         }
                     }

@@ -10,24 +10,23 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.content.ClipData;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
 import com.example.odometryapp_v10.Dialogs.EditFunction;
-import com.github.clans.fab.FloatingActionButton;
-import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener {
     com.github.sealstudios.fab.FloatingActionButton callFunction;
@@ -36,57 +35,17 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
+    final ArrayList<RecyclerViewItem> recyclerViewItemArrayList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
 
         checkForWritePermission();
 
-
-        final ArrayList<RecyclerViewItem> recyclerViewItemArrayList = new ArrayList<>();
-        recyclerViewItemArrayList.add(new RecyclerViewItem("Move To Position", "X: 12, Y: 25, Direction: true"));
-        recyclerViewItemArrayList.add(new RecyclerViewItem("Strafe To Position", "X: 12, Y: 25, Direction: true"));
-        recyclerViewItemArrayList.add(new RecyclerViewItem("Turn", "Heading: 90, Power: 10"));
-
-        recyclerView = findViewById(R.id.programFunctionsRecyclerView);
-        recyclerView.setHasFixedSize(true);
-        recyclerViewLayoutManager = new LinearLayoutManager(this);
-        recyclerViewAdapter = new RecyclerViewAdapter(recyclerViewItemArrayList);
-        recyclerView.setLayoutManager(recyclerViewLayoutManager);
-        recyclerView.setAdapter(recyclerViewAdapter);
-        recyclerViewAdapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-                System.out.println("ksjdnlanf: " + position);
-            }
-        });
-
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return true;
-            }
-
-            @Override
-            public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
-                final int deletedColumnPosition = viewHolder.getAdapterPosition();
-                final RecyclerViewItem currentItem = recyclerViewItemArrayList.get(deletedColumnPosition);
-                CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinator);
-                Snackbar snackbar = Snackbar.make(coordinatorLayout, "Function deleted", Snackbar.LENGTH_SHORT)
-                        .setAction("UNDO", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                recyclerViewItemArrayList.add(deletedColumnPosition, currentItem);
-                                recyclerViewAdapter.notifyDataSetChanged();
-                            }
-                        });
-                snackbar.show();
-                recyclerViewItemArrayList.remove(deletedColumnPosition);
-                recyclerViewAdapter.notifyDataSetChanged();
-            }
-        }).attachToRecyclerView(recyclerView);
+        buildRecyclerView();
 
         com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
         addNewFunction.setOnClickListener(new View.OnClickListener() {
@@ -117,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 editFunction.show(getSupportFragmentManager(), "editFunction");
             }
         });
+
         canRunFABThread = true;
         enableOrDisableFAButtons();
     }
@@ -151,6 +111,74 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             }
         }
 
+    }
+
+    private void buildRecyclerView() {
+        recyclerView = findViewById(R.id.programFunctionsRecyclerView);
+        recyclerView.setHasFixedSize(true);
+        recyclerViewLayoutManager = new LinearLayoutManager(this);
+        recyclerViewAdapter = new RecyclerViewAdapter(recyclerViewItemArrayList);
+        recyclerView.setLayoutManager(recyclerViewLayoutManager);
+        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerViewAdapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position) {
+//                CallFunction callFunction = new CallFunction();
+//                callFunction.setCancelable(false);
+//                callFunction.show(getSupportFragmentManager(), "callFunction");
+//                int positionOfFunction;
+//                try {
+//                    positionOfFunction = JSON.returnPositionFromJSONArray(JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function"), recyclerViewItemArrayList.get(position).getFunctionName()) + 1;
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                    positionOfFunction = 0;
+//                }
+//                System.out.println("position: " + positionOfFunction);
+//
+//                while (!CallFunction.canSetSelectionOfFunctionSelector){
+//
+//                }
+//
+//                CallFunction.setUpFunctionEditing(position, listOfAllFunctionParameters.get(position));
+//                CallFunction.populateComponentsForEditing(positionOfFunction);
+            }
+        });
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                int fromPosition = viewHolder.getAdapterPosition();
+                int toPosition = target.getAdapterPosition();
+
+                Collections.swap(recyclerViewItemArrayList, fromPosition, toPosition);
+                recyclerViewAdapter.notifyItemMoved(fromPosition, toPosition);
+
+                return true;
+            }
+
+            @Override
+            public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
+                final int deletedColumnPosition = viewHolder.getAdapterPosition();
+                final RecyclerViewItem currentItem = recyclerViewItemArrayList.get(deletedColumnPosition);
+                CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinator);
+                Snackbar snackbar = Snackbar.make(coordinatorLayout, "Function deleted", Snackbar.LENGTH_SHORT)
+                        .setAction("UNDO", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                recyclerViewItemArrayList.add(deletedColumnPosition, currentItem);
+                                recyclerViewAdapter.notifyDataSetChanged();
+                            }
+                        });
+                snackbar.show();
+                recyclerViewItemArrayList.remove(deletedColumnPosition);
+                recyclerViewAdapter.notifyDataSetChanged();
+            }
+        }).attachToRecyclerView(recyclerView);
+    }
+
+    private void addToRecyclerView(String functionName, String functionParameters) {
+        recyclerViewItemArrayList.add(new RecyclerViewItem(functionName, functionParameters));
+        recyclerViewAdapter.notifyDataSetChanged();
     }
 
     private boolean canRunFABThread;
@@ -219,9 +247,33 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         }
     }
 
-    @Override
-    public void callFunction(ArrayList<ArrayList<Object>> functionParameters) {
+    boolean doesHaveToCreateNewFile = true;
 
+    ArrayList<ArrayList<ArrayList<Object>>> listOfAllFunctionParameters = new ArrayList<>();
+
+    @Override
+    public void callFunction(String functionName, ArrayList<ArrayList<Object>> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int positionOfEdit) {
+        if(!isEditing) {
+            if(doesHaveToCreateNewFile) {
+                String fileName = "program";
+                int fileNumber = 1;
+                if(JSON.doesFileExist("program", null)) {
+                    boolean didFindNonexistentFile = false;
+                    while(!didFindNonexistentFile) {
+                        if(!JSON.doesFileExist("program" + fileNumber, null)) {
+                            didFindNonexistentFile = true;
+                        }
+                        fileNumber++;
+                    }
+                    fileName = "program" + fileNumber;
+                }
+                JSON.createFile(fileName, null);
+                doesHaveToCreateNewFile = false;
+            }
+            listOfAllFunctionParameters.add(functionParameters);
+            addToRecyclerView(functionName, functionParameters.toString());
+            JSON.addFunctionFromProgramToFile(functionName, functionParameters);
+        }
     }
 
     @Override

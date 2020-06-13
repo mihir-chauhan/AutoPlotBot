@@ -72,6 +72,26 @@ public class JSON {
         }
     }
 
+    public static void createFile(String fileName, @Nullable String filePath) {
+        if (!fileName.contains(".txt")) {
+            fileName += ".txt";
+        }
+        File file = new File(filePath, fileName);
+        if (filePath == null) {
+            file = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/", fileName);
+        }
+        FileOutputStream outputStream;
+        byte[] data = null;
+        try {
+            outputStream = new FileOutputStream(file);
+            outputStream.write(data);
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Nullable
     public static JSONObject readJSONTextFile(String fileName, @Nullable String filePath) {
         if (!fileName.contains(".txt")) {
@@ -239,5 +259,23 @@ public class JSON {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static Integer returnPositionFromJSONArray(JSONArray jsonArray, String name) {
+        for (int i = 0; i < jsonArray.length(); i++) {
+            try {
+                if (jsonArray.getJSONObject(i).getString("functionName").equals(name)) {
+                    return i;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return -1;
+    }
+
+
+    public static void addFunctionFromProgramToFile(String functionName, ArrayList<ArrayList<Object>> functionParameters){
+
     }
 }

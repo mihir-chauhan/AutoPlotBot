@@ -26,8 +26,10 @@ import com.google.android.material.snackbar.Snackbar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener {
     com.github.sealstudios.fab.FloatingActionButton callFunction;
@@ -155,6 +157,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 Collections.swap(recyclerViewItemArrayList, fromPosition, toPosition);
                 recyclerViewAdapter.notifyItemMoved(fromPosition, toPosition);
 
+                JSON.reorderFunctionsInProgram(fromPosition, toPosition, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
+
                 return true;
             }
 
@@ -281,7 +285,10 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                             fileNumber++;
                         }
                     }
-                    JSON.createFile(fileName, null);
+                    SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
+                    Date date = new Date();
+                    fileName += "-" + formatter.format(date);
+                    JSON.createFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
                     doesHaveToCreateNewFile = false;
                     currentFileName = fileName;
                     listOfAllFunctionParameters.add(functionParameters);

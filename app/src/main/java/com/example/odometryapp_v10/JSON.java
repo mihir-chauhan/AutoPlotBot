@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class JSON {
     public enum JSONArchitecture {
@@ -286,6 +287,30 @@ public class JSON {
         }
 
 
-        appendJSONToTextFile(fileName, null, jsonObject, null, JSONArchitecture.DefaultRobotController_Notation);
+        appendJSONToTextFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/", jsonObject, null, JSONArchitecture.DefaultRobotController_Notation);
     }
+
+
+    public static void reorderFunctionsInProgram(int fromPosition, int toPosition, String fileName, @Nullable String filePath) {
+        JSONObject fileContents = readJSONTextFile(fileName, filePath);
+
+        try {
+            ArrayList<JSONObject> functionJSONObjects = new ArrayList<>();
+            JSONArray jsonArray = fileContents.getJSONArray("program");
+            for(int i = 0; i < jsonArray.length(); i++) {
+                functionJSONObjects.add(jsonArray.getJSONObject(i));
+            }
+            Collections.swap(functionJSONObjects, fromPosition, toPosition);
+            JSONArray newlyCreatedJSONArray = new JSONArray();
+            for(int i = 0; i < functionJSONObjects.size(); i++) {
+                newlyCreatedJSONArray.put(functionJSONObjects.get(i));
+            }
+            JSONObject newlyCreatedFileObject = new JSONObject();
+            newlyCreatedFileObject.put("program", newlyCreatedJSONArray);
+            writeJSONToTextFile(fileName, filePath, newlyCreatedFileObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

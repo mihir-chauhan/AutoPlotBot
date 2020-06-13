@@ -2,6 +2,7 @@ package com.example.odometryapp_v10;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.arch.core.util.Function;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     private RecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
     final ArrayList<RecyclerViewItem> recyclerViewItemArrayList = new ArrayList<>();
+    boolean doesHaveToCreateNewFile = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,8 +178,17 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         }).attachToRecyclerView(recyclerView);
     }
 
-    private void addToRecyclerView(String functionName, String functionParameters) {
-        recyclerViewItemArrayList.add(new RecyclerViewItem(functionName, functionParameters));
+    private void addToRecyclerView(String functionName, ArrayList<FunctionReturnFormat> functionParameters) {
+        StringBuilder parametersOfFunction = new StringBuilder();
+
+        if(functionParameters.size() >= 1) {
+            for(int i = 0; i < functionParameters.size() - 1; i++) {
+                parametersOfFunction.append(functionParameters.get(i).parameterName + ": " + functionParameters.get(i).parameterValue + ", ");
+            }
+            parametersOfFunction.append(functionParameters.get(functionParameters.size() - 1).parameterName + ": " + functionParameters.get(functionParameters.size() - 1).parameterValue);
+        }
+
+        recyclerViewItemArrayList.add(new RecyclerViewItem(functionName, parametersOfFunction.toString()));
         recyclerViewAdapter.notifyDataSetChanged();
     }
 
@@ -247,33 +258,51 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         }
     }
 
-    boolean doesHaveToCreateNewFile = true;
-
-    ArrayList<ArrayList<ArrayList<Object>>> listOfAllFunctionParameters = new ArrayList<>();
+    ArrayList<ArrayList<FunctionReturnFormat>> listOfAllFunctionParameters = new ArrayList<>();
+    String currentFileName;
 
     @Override
-    public void callFunction(String functionName, ArrayList<ArrayList<Object>> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int positionOfEdit) {
-        if(!isEditing) {
-            if(doesHaveToCreateNewFile) {
-                String fileName = "program";
-                int fileNumber = 1;
-                if(JSON.doesFileExist("program", null)) {
-                    boolean didFindNonexistentFile = false;
-                    while(!didFindNonexistentFile) {
-                        if(!JSON.doesFileExist("program" + fileNumber, null)) {
-                            didFindNonexistentFile = true;
+    public void callFunction(String functionName, ArrayList<FunctionReturnFormat> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int positionOfEdit) {
+        ArrayList<Object> nullValidation = new ArrayList<>();
+        nullValidation.add(functionName);
+        nullValidation.add(functionParameters);
+        if(!isNull(nullValidation)) {
+            String fileName = "program";
+            if(!isEditing) {
+                if(doesHaveToCreateNewFile) {
+                    int fileNumber = 1;
+                    if(JSON.doesFileExist("program", null)) {
+                        boolean didFindNonexistentFile = false;
+                        while(!didFindNonexistentFile) {
+                            fileName = "program" + fileNumber;
+                            if(!JSON.doesFileExist(fileName, null)) {
+                                didFindNonexistentFile = true;
+                            }
+                            fileNumber++;
                         }
-                        fileNumber++;
                     }
-                    fileName = "program" + fileNumber;
+                    JSON.createFile(fileName, null);
+                    doesHaveToCreateNewFile = false;
+                    currentFileName = fileName;
+                    listOfAllFunctionParameters.add(functionParameters);
+                    addToRecyclerView(functionName, functionParameters);
+                    JSON.addFunctionFromProgramToFile(fileName, functionName, functionParameters);
+                } else {
+                    listOfAllFunctionParameters.add(functionParameters);
+                    addToRecyclerView(functionName, functionParameters);
+                    JSON.addFunctionFromProgramToFile(currentFileName, functionName, functionParameters);
                 }
-                JSON.createFile(fileName, null);
-                doesHaveToCreateNewFile = false;
             }
-            listOfAllFunctionParameters.add(functionParameters);
-            addToRecyclerView(functionName, functionParameters.toString());
-            JSON.addFunctionFromProgramToFile(functionName, functionParameters);
         }
+    }
+
+    public boolean isNull(ArrayList<Object> objects) {
+        for(int i = 0; i < objects.size(); i++) {
+            if(objects.get(i) == null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

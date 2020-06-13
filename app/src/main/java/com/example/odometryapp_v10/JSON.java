@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
@@ -80,14 +81,9 @@ public class JSON {
         if (filePath == null) {
             file = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/", fileName);
         }
-        FileOutputStream outputStream;
-        byte[] data = null;
         try {
-            outputStream = new FileOutputStream(file);
-            outputStream.write(data);
-            outputStream.flush();
-            outputStream.close();
-        } catch (Exception e) {
+            file.createNewFile();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -275,7 +271,21 @@ public class JSON {
     }
 
 
-    public static void addFunctionFromProgramToFile(String functionName, ArrayList<ArrayList<Object>> functionParameters){
+    public static void addFunctionFromProgramToFile(String fileName, String functionName, ArrayList<FunctionReturnFormat> functionParameters){
+        JSONObject jsonObject = new JSONObject();
 
+        try {
+            jsonObject.put("functionName", functionName);
+            JSONObject parametersObject = new JSONObject();
+            for(int i = 0; i < functionParameters.size(); i++) {
+                parametersObject.put(functionParameters.get(i).parameterName, functionParameters.get(i).parameterValue);
+            }
+            jsonObject.put("parameters", parametersObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        appendJSONToTextFile(fileName, null, jsonObject, null, JSONArchitecture.DefaultRobotController_Notation);
     }
 }

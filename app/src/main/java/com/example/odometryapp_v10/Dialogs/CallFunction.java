@@ -25,6 +25,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+import com.example.odometryapp_v10.FunctionReturnFormat;
 import com.example.odometryapp_v10.JSON;
 import com.example.odometryapp_v10.R;
 
@@ -34,6 +35,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Scanner;
 
 public class CallFunction extends AppCompatDialogFragment implements AdapterView.OnItemSelectedListener {
     private callFunctionListener listener;
@@ -63,8 +65,6 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         listView.setDividerHeight(0);
         initializeDialogComponents();
 
-
-
         builder.setView(view).setTitle("Call Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -77,21 +77,21 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                     Toast.makeText(getContext(), "No function is being called", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                ArrayList<ArrayList<Object>> parametersArray = new ArrayList<>();
+                ArrayList<FunctionReturnFormat> parametersArray = new ArrayList<>();
                 for (int parameters = 0; parameters < numberOfParameters; parameters++) {
-                    ArrayList<Object> individualParameters = new ArrayList<>();
-                    individualParameters.add(parameterNames.get(parameters));
+                    String functionName = parameterNames.get(parameters);
+                    Object functionParameter;
                     if(parameterTypes.get(parameters).equals("Boolean")) {
-                        individualParameters.add(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), true));
+                        functionParameter = (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), true));
                     } else {
                         if(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false).equals("")) {
                             Toast.makeText(getContext(), "One or more fields are blank", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        individualParameters.add(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false));
+                        functionParameter = (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false));
                     }
 
-                    parametersArray.add(individualParameters);
+                    parametersArray.add(new FunctionReturnFormat(functionName, functionParameter));
                 }
                 //returns array of format: [["parameterName", "parameterValue"], ["...", "..."], ["...", "..."], ...]
                 listener.callFunction(selectedFunctionName, parametersArray, isSelectedFunctionADrivetrainFunction, isEditingFunction, positionToEDIT);
@@ -158,7 +158,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
 
     public interface callFunctionListener {
-        void callFunction(String functionName, ArrayList<ArrayList<Object>> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int funtionPosition);
+        void callFunction(String functionName, ArrayList<FunctionReturnFormat> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int funtionPosition);
     }
 
     String selectedFunctionName;
@@ -274,7 +274,6 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
             }
 
             if(isEditingFunction) {
-                System.out.println("asdjasjdnfkldjasfnlasdnflakdsjnflsajkdnflasdnflaksnflanfjasnflsadjfnad");
                 if(parametersIF_EDITING.get(position).get(1).toString().equals("true") || parametersIF_EDITING.get(position).get(1).toString().equals("false")) {
                     if(parametersIF_EDITING.get(position).get(1).toString().equals("true")) {
                         holder.booleanSwitch.setChecked(true);
@@ -306,11 +305,23 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
             return parameterName.getText().toString();
         }
 
-        public String getParameterNamesFromView(View view, boolean isBoolean) {
+        public Object getParameterNamesFromView(View view, boolean isBoolean) {
+
             if(!isBoolean) {
-                return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
+                try {
+                    Scanner scanner = new Scanner(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
+                    if (scanner.hasNextInt()) {
+                        return Integer.parseInt(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
+                    } else if(scanner.hasNextDouble()) {
+                        return Double.parseDouble(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
+                    } else {
+                        return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
+                    }
+                } catch (Exception e) {
+                    return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
+                }
             } else {
-                return Boolean.toString(((Switch) view.findViewById(R.id.booleanSwitch)).isChecked());
+                return ((Switch) view.findViewById(R.id.booleanSwitch)).isChecked();
             }
         }
     }

@@ -15,18 +15,16 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
-import com.example.odometryapp_v10.FunctionReturnFormat;
-import com.example.odometryapp_v10.JSON;
+import com.example.odometryapp_v10.Main.FunctionReturnFormat;
+import com.example.odometryapp_v10.Main.JSON;
 import com.example.odometryapp_v10.R;
 
 import org.json.JSONArray;

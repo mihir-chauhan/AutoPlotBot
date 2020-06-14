@@ -48,7 +48,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
         functionTypeSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if(position == 1) {
+                if (position == 1) {
                     numberOfParameters = 2;
                     drivetrainFunctionProtocol = true;
                     adapter.notifyDataSetChanged();
@@ -76,7 +76,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
             public void onClick(DialogInterface dialogInterface, int i) {
                 if (numberOfParameters >= 1) {
                     for (int position = 0; position < numberOfParameters; position++) {
-                        if(adapter.getInfoFromView(adapter.getViewByPosition(position, listView)).get(0).toString().equals("") ||
+                        if (adapter.getInfoFromView(adapter.getViewByPosition(position, listView)).get(0).toString().equals("") ||
                                 adapter.getInfoFromView(adapter.getViewByPosition(position, listView)).get(1).toString().equals("Parameter Type")) {
                             Toast.makeText(getContext(), "One or more parameter fields are blank", Toast.LENGTH_SHORT).show();
                             return;
@@ -85,7 +85,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
                     }
                 }
                 if (!functionName.getText().toString().isEmpty()) {
-                    if(functionTypeSelector.getSelectedItemPosition() == 0) {
+                    if (functionTypeSelector.getSelectedItemPosition() == 0) {
                         Toast.makeText(getContext(), "Function type is undefined", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -104,7 +104,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
             public void onClick(View v) {
                 if (numberOfParameters >= 1) {
                     savedParameters.clear();
-                    for(int parameters = 0; parameters < numberOfParameters; parameters++) {
+                    for (int parameters = 0; parameters < numberOfParameters; parameters++) {
                         savedParameters.add(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView)));
                     }
                 }
@@ -119,7 +119,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
         removeParameters.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(canRemoveFromSavedParametersArrayList) {
+                if (canRemoveFromSavedParametersArrayList) {
                     savedParameters.remove(savedParameters.size() - 1);
                 }
 
@@ -193,13 +193,13 @@ public class AddNewFunction extends AppCompatDialogFragment {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            if(drivetrainFunctionProtocol) {
-                if(position == 0) {
+            if (drivetrainFunctionProtocol) {
+                if (position == 0) {
                     holder.editText.setText("x");
                     holder.spinner.setSelection(3);
                     holder.editText.setEnabled(false);
                     holder.spinner.setEnabled(false);
-                } else if(position == 1) {
+                } else if (position == 1) {
                     holder.editText.setText("y");
                     holder.spinner.setSelection(3);
                     holder.editText.setEnabled(false);
@@ -207,7 +207,9 @@ public class AddNewFunction extends AppCompatDialogFragment {
                 } else {
                     holder.editText.setEnabled(true);
                     holder.spinner.setEnabled(true);
-                    holder.spinner.setSelection(0);
+                    if(position == savedParameters.size()) {
+                        holder.spinner.setSelection(0);
+                    }
                     try {
                         holder.editText.setText(savedParameters.get(position));
                     } catch (Exception e) {

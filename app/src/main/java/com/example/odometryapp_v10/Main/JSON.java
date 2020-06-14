@@ -1,7 +1,6 @@
-package com.example.odometryapp_v10;
+package com.example.odometryapp_v10.Main;
 
 import android.os.Environment;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 

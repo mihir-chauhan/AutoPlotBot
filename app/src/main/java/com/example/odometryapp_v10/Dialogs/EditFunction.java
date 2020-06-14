@@ -20,12 +20,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDialogFragment;
 
-import com.example.odometryapp_v10.JSON;
+import com.example.odometryapp_v10.Main.JSON;
 import com.example.odometryapp_v10.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;

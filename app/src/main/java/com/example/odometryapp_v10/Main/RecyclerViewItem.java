@@ -1,4 +1,4 @@
-package com.example.odometryapp_v10;
+package com.example.odometryapp_v10.Main;
 
 public class RecyclerViewItem {
     private String functionName;

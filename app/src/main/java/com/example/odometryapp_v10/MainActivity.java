@@ -2,7 +2,6 @@ package com.example.odometryapp_v10;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.arch.core.util.Function;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -12,9 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -22,9 +21,12 @@ import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
 import com.example.odometryapp_v10.Dialogs.EditFunction;
 import com.example.odometryapp_v10.Dialogs.SaveFile;
+import com.example.odometryapp_v10.Main.FunctionReturnFormat;
+import com.example.odometryapp_v10.Main.JSON;
+import com.example.odometryapp_v10.Main.RecyclerViewAdapter;
+import com.example.odometryapp_v10.Main.RecyclerViewItem;
 import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -150,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 //                    e.printStackTrace();
 //                    positionOfFunction = 0;
 //                }
-//                System.out.println("position: " + positionOfFunction);
 //
 //                while (!CallFunction.canSetSelectionOfFunctionSelector){
 //
@@ -233,6 +234,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                                     callFunction.setEnabled(false);
                                     editFunction.setEnabled(false);
                                 }
+                            } else {
+                                callFunction.setEnabled(false);
+                                editFunction.setEnabled(false);
                             }
                             if(recyclerViewItemArrayList.size() >= 1) {
                                 saveFunction.setEnabled(true);
@@ -356,11 +360,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         if(!fileName.contains(".txt")) {
             newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName + ".txt");
         }
-        System.out.println("blahblahblah");
-        System.out.println(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName + ".txt");
-        System.out.println(currentFileName + ".txt");
         if (currentFile.renameTo(newFileName)) {
-            System.out.println("File renamed successfully");
+
         } else {
             System.out.println("Failed to rename file");
         }

@@ -1,6 +1,5 @@
-package com.example.odometryapp_v10;
+package com.example.odometryapp_v10.Main;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +7,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.odometryapp_v10.R;
 
 import java.util.ArrayList;
 

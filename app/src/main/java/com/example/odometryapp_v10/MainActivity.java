@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Spinner;
 
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
@@ -205,7 +206,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     e.printStackTrace();
                 }
                 String functionName = recyclerViewItemArrayList.get(deletedRowPosition).getFunctionName();
-                int jsonObjectPositionOfRemoval = JSON.returnFunctionPositionFromJSONArray(jsonArray, functionName);
                 CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinator);
                 Snackbar snackbar = Snackbar.make(coordinatorLayout, "Function deleted", Snackbar.LENGTH_SHORT)
                         .setAction("UNDO", new View.OnClickListener() {
@@ -221,7 +221,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 recyclerViewItemArrayList.remove(deletedRowPosition);
                 recyclerViewAdapter.notifyDataSetChanged();
                 if(jsonArray != null) {
-                    JSON.removeFromJSONTextFile(currentFileName, currentFilePath, jsonObjectPositionOfRemoval, JSON.JSONArchitecture.DefaultRobotController_Notation);
+                    System.out.println("position of removal: " + deletedRowPosition);
+                    JSON.removeFromJSONTextFile(currentFileName, currentFilePath, deletedRowPosition, JSON.JSONArchitecture.DefaultRobotController_Notation);
                 } else {
                     throw new NullPointerException("Unable to find program file onDeletion (onSwiped) at Line: 224, Main Activity");
                 }

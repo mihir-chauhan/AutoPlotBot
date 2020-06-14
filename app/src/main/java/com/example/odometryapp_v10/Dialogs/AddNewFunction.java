@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+import com.example.odometryapp_v10.Main.JSON;
 import com.example.odometryapp_v10.R;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -74,6 +79,22 @@ public class AddNewFunction extends AppCompatDialogFragment {
         }).setPositiveButton("done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                JSONObject jsonObject = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/");
+                try {
+                    JSONArray jsonArray = jsonObject.getJSONArray("function");
+                    ArrayList<String> functionNames = new ArrayList<>();
+                    for (int x = 0; x < jsonArray.length(); x++) {
+                        functionNames.add(jsonArray.getJSONObject(x).getString("functionName"));
+                    }
+                    for(int y = 0; y < functionNames.size(); y++) {
+                        if(functionNames.get(y).equals(functionName.getText().toString())) {
+                            Toast.makeText(getContext(), "Function with the same name is already defined", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+                } catch (Exception ignore) {
+
+                }
                 if (numberOfParameters >= 1) {
                     for (int position = 0; position < numberOfParameters; position++) {
                         if (adapter.getInfoFromView(adapter.getViewByPosition(position, listView)).get(0).toString().equals("") ||

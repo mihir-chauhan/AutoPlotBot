@@ -13,13 +13,13 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
 import com.example.odometryapp_v10.Dialogs.EditFunction;
+import com.example.odometryapp_v10.Dialogs.LoadFile;
 import com.example.odometryapp_v10.Dialogs.SaveFile;
 import com.example.odometryapp_v10.Main.FunctionReturnFormat;
 import com.example.odometryapp_v10.Main.JSON;
@@ -27,18 +27,22 @@ import com.example.odometryapp_v10.Main.RecyclerViewAdapter;
 import com.example.odometryapp_v10.Main.RecyclerViewItem;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener, SaveFile.saveFunctionListener {
+public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener, SaveFile.saveProgramListener, LoadFile.loadProgramListener {
     com.github.sealstudios.fab.FloatingActionButton callFunction;
     com.github.sealstudios.fab.FloatingActionButton editFunction;
     com.github.sealstudios.fab.FloatingActionButton saveFunction;
+    com.github.sealstudios.fab.FloatingActionButton loadFunction;
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
@@ -96,6 +100,16 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             }
         });
         saveFunction.setEnabled(false);
+
+        loadFunction = findViewById(R.id.uploadFile);
+        loadFunction.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LoadFile loadFile = new LoadFile();
+                loadFile.setCancelable(false);
+                loadFile.show(getSupportFragmentManager(), "loadFile");
+            }
+        });
 
         canRunFABThread = true;
         enableOrDisableFAButtons();
@@ -171,27 +185,46 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 Collections.swap(recyclerViewItemArrayList, fromPosition, toPosition);
                 recyclerViewAdapter.notifyItemMoved(fromPosition, toPosition);
 
-                JSON.reorderFunctionsInProgram(fromPosition, toPosition, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
+                if (currentFilePath.contains("AutosavedFiles")) {
+                    JSON.reorderFunctionsInProgram(fromPosition, toPosition, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
+                } else {
+                    JSON.reorderFunctionsInProgram(fromPosition, toPosition, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/");
+                }
 
                 return true;
             }
 
             @Override
             public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
-                final int deletedColumnPosition = viewHolder.getAdapterPosition();
-                final RecyclerViewItem currentItem = recyclerViewItemArrayList.get(deletedColumnPosition);
+                final int deletedRowPosition = viewHolder.getAdapterPosition();
+                final RecyclerViewItem currentItem = recyclerViewItemArrayList.get(deletedRowPosition);
+                JSONArray jsonArray = null;
+                try {
+                    jsonArray = JSON.readJSONTextFile(currentFileName, currentFilePath).getJSONArray("program");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                String functionName = recyclerViewItemArrayList.get(deletedRowPosition).getFunctionName();
+                int jsonObjectPositionOfRemoval = JSON.returnFunctionPositionFromJSONArray(jsonArray, functionName);
                 CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinator);
                 Snackbar snackbar = Snackbar.make(coordinatorLayout, "Function deleted", Snackbar.LENGTH_SHORT)
                         .setAction("UNDO", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                recyclerViewItemArrayList.add(deletedColumnPosition, currentItem);
+                                recyclerViewItemArrayList.add(deletedRowPosition, currentItem);
                                 recyclerViewAdapter.notifyDataSetChanged();
+
                             }
                         });
                 snackbar.show();
-                recyclerViewItemArrayList.remove(deletedColumnPosition);
+
+                recyclerViewItemArrayList.remove(deletedRowPosition);
                 recyclerViewAdapter.notifyDataSetChanged();
+                if(jsonArray != null) {
+                    JSON.removeFromJSONTextFile(currentFileName, currentFilePath, jsonObjectPositionOfRemoval, JSON.JSONArchitecture.DefaultRobotController_Notation);
+                } else {
+                    throw new NullPointerException("Unable to find program file onDeletion (onSwiped) at Line: 224, Main Activity");
+                }
             }
         }).attachToRecyclerView(recyclerView);
     }
@@ -199,8 +232,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     private void addToRecyclerView(String functionName, ArrayList<FunctionReturnFormat> functionParameters) {
         StringBuilder parametersOfFunction = new StringBuilder();
 
-        if(functionParameters.size() >= 1) {
-            for(int i = 0; i < functionParameters.size() - 1; i++) {
+        if (functionParameters.size() >= 1) {
+            for (int i = 0; i < functionParameters.size() - 1; i++) {
                 parametersOfFunction.append(functionParameters.get(i).parameterName + ": " + functionParameters.get(i).parameterValue + ", ");
             }
             parametersOfFunction.append(functionParameters.get(functionParameters.size() - 1).parameterName + ": " + functionParameters.get(functionParameters.size() - 1).parameterValue);
@@ -238,11 +271,27 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                                 callFunction.setEnabled(false);
                                 editFunction.setEnabled(false);
                             }
-                            if(recyclerViewItemArrayList.size() >= 1) {
+                            if (recyclerViewItemArrayList.size() >= 1) {
                                 saveFunction.setEnabled(true);
                             } else {
                                 saveFunction.setEnabled(false);
                             }
+
+                            File f = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/");
+
+                            FilenameFilter filter = new FilenameFilter() {
+                                @Override
+                                public boolean accept(File f, String name) {
+                                    return name.endsWith(".txt");
+                                }
+                            };
+
+                            if(f.list(filter).length >= 1) {
+                                loadFunction.setEnabled(true);
+                            } else {
+                                loadFunction.setEnabled(false);
+                            }
+
                         }
                     });
                     try {
@@ -286,22 +335,23 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     ArrayList<ArrayList<FunctionReturnFormat>> listOfAllFunctionParameters = new ArrayList<>();
     String currentFileName;
+    String currentFilePath;
 
     @Override
     public void callFunction(String functionName, ArrayList<FunctionReturnFormat> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int positionOfEdit) {
         ArrayList<Object> nullValidation = new ArrayList<>();
         nullValidation.add(functionName);
         nullValidation.add(functionParameters);
-        if(!isNull(nullValidation)) {
+        if (!isNull(nullValidation)) {
             String fileName = "program";
-            if(!isEditing) {
-                if(doesHaveToCreateNewFile) {
+            if (!isEditing) {
+                if (doesHaveToCreateNewFile) {
                     int fileNumber = 1;
-                    if(JSON.doesFileExist("program", null)) {
+                    if (JSON.doesFileExist("program", null)) {
                         boolean didFindNonexistentFile = false;
-                        while(!didFindNonexistentFile) {
+                        while (!didFindNonexistentFile) {
                             fileName = "program" + fileNumber;
-                            if(!JSON.doesFileExist(fileName, null)) {
+                            if (!JSON.doesFileExist(fileName, null)) {
                                 didFindNonexistentFile = true;
                             }
                             fileNumber++;
@@ -313,21 +363,26 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     JSON.createFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
                     doesHaveToCreateNewFile = false;
                     currentFileName = fileName;
+                    currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/";
                     listOfAllFunctionParameters.add(functionParameters);
                     addToRecyclerView(functionName, functionParameters);
-                    JSON.addFunctionFromProgramToFile(fileName, functionName, functionParameters);
+                    JSON.addFunctionFromProgramToFile(fileName, functionName, functionParameters, null);
                 } else {
                     listOfAllFunctionParameters.add(functionParameters);
                     addToRecyclerView(functionName, functionParameters);
-                    JSON.addFunctionFromProgramToFile(currentFileName, functionName, functionParameters);
+                    if (currentFileName.contains("program")) {
+                        JSON.addFunctionFromProgramToFile(currentFileName, functionName, functionParameters, null);
+                    } else {
+                        JSON.addFunctionFromProgramToFile(currentFileName, functionName, functionParameters, Environment.getExternalStorageDirectory() + "/Innov8rz/");
+                    }
                 }
             }
         }
     }
 
     public boolean isNull(ArrayList<Object> objects) {
-        for(int i = 0; i < objects.size(); i++) {
-            if(objects.get(i) == null) {
+        for (int i = 0; i < objects.size(); i++) {
+            if (objects.get(i) == null) {
                 return true;
             }
         }
@@ -354,16 +409,23 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     @Override
-    public void saveFunction(String fileName) {
+    public void saveProgram(String fileName) {
         File currentFile = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/" + currentFileName + ".txt");
         File newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName);
-        if(!fileName.contains(".txt")) {
+        if (!fileName.contains(".txt")) {
             newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName + ".txt");
         }
+        currentFileName = newFileName.getName();
+        currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
         if (currentFile.renameTo(newFileName)) {
 
         } else {
             System.out.println("Failed to rename file");
         }
+    }
+
+    @Override
+    public void loadProgram() {
+
     }
 }

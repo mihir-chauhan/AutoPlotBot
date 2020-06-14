@@ -12,7 +12,7 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import com.example.odometryapp_v10.R;
 
 public class SaveFile extends AppCompatDialogFragment {
-    private saveFunctionListener listener;
+    private saveProgramListener listener;
     private View view;
 
     @Override
@@ -22,14 +22,14 @@ public class SaveFile extends AppCompatDialogFragment {
         view = inflater.inflate(R.layout.save_file_dialog, null);
         final EditText functionName = view.findViewById(R.id.saveFileName);
 
-        builder.setView(view).setTitle("Edit Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setView(view).setTitle("Save Program").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
             }
         }).setPositiveButton("done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                listener.saveFunction(functionName.getText().toString());
+                listener.saveProgram(functionName.getText().toString());
             }
         });
 
@@ -42,13 +42,13 @@ public class SaveFile extends AppCompatDialogFragment {
         super.onAttach(context);
 
         try {
-            listener = (saveFunctionListener) context;
+            listener = (saveProgramListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + "must implement pathListener");
         }
     }
 
-    public interface saveFunctionListener {
-        void saveFunction(String fileName);
+    public interface saveProgramListener {
+        void saveProgram(String fileName);
     }
 }

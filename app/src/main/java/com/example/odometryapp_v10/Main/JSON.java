@@ -192,10 +192,15 @@ public class JSON {
         );
     }
 
-    public static void removeInJSONTextFile(String fileName, JSONObject fileContents, int positionOfItemForRemoval, String filePath) {
+    public static void removeInJSONTextFile(String fileName, JSONObject fileContents, int positionOfItemForRemoval, String filePath, JSONArchitecture jsonArchitecture) {
         try {
             JSONArray list = new JSONArray();
-            JSONArray jsonArray = fileContents.getJSONArray("function");
+            JSONArray jsonArray;
+            if(jsonArchitecture == JSONArchitecture.Function_Notation) {
+                jsonArray = fileContents.getJSONArray("function");
+            } else {
+                jsonArray = fileContents.getJSONArray("program");
+            }
             int len = jsonArray.length();
             if (jsonArray != null) {
                 for (int i=0;i<len;i++) {
@@ -214,14 +219,14 @@ public class JSON {
         }
     }
 
-    public static void removeFromJSONTextFile(String fileName, @Nullable String filePath, int positionOfItemForRemoval) {
+    public static void removeFromJSONTextFile(String fileName, @Nullable String filePath, int positionOfItemForRemoval, JSONArchitecture jsonArchitecture) {
         JSONObject fileContents = null;
         try {
             fileContents = readJSONTextFile(fileName, filePath);
         } catch (Exception e) {
 
         }
-        removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+        removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath, jsonArchitecture);
     }
 
     public static void replaceInJSONTextFile(String fileName, int positionOfItemForRemoval, @Nullable String filePath, @Nullable JSONObject jsonObject, @Nullable JSONArray jsonArray, JSONArchitecture fileArchitecture) {
@@ -235,18 +240,18 @@ public class JSON {
         try {
             if (jsonArray == null && jsonObject != null) {
                 if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
-                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath, fileArchitecture);
                     appendJSONToTextFile(fileName, filePath, jsonObject, jsonArray, fileArchitecture);
                 } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
-                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath, fileArchitecture);
                     appendJSONToTextFile(fileName, filePath, jsonObject, jsonArray, fileArchitecture);
                 }
             } else if (jsonArray != null && jsonObject == null) {
                 if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
-                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath, fileArchitecture);
                     appendJSONToTextFile(fileName, filePath, jsonObject, jsonArray, fileArchitecture);
                 } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
-                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath);
+                    removeInJSONTextFile(fileName, fileContents, positionOfItemForRemoval, filePath, fileArchitecture);
                     appendJSONToTextFile(fileName, filePath, jsonObject, jsonArray, fileArchitecture);
                 }
             } else {
@@ -257,7 +262,7 @@ public class JSON {
         }
     }
 
-    public static Integer returnPositionFromJSONArray(JSONArray jsonArray, String name) {
+    public static Integer returnFunctionPositionFromJSONArray(JSONArray jsonArray, String name) {
         for (int i = 0; i < jsonArray.length(); i++) {
             try {
                 if (jsonArray.getJSONObject(i).getString("functionName").equals(name)) {
@@ -271,7 +276,7 @@ public class JSON {
     }
 
 
-    public static void addFunctionFromProgramToFile(String fileName, String functionName, ArrayList<FunctionReturnFormat> functionParameters){
+    public static void addFunctionFromProgramToFile(String fileName, String functionName, ArrayList<FunctionReturnFormat> functionParameters, @Nullable String filePath){
         JSONObject jsonObject = new JSONObject();
 
         try {
@@ -286,7 +291,11 @@ public class JSON {
         }
 
 
-        appendJSONToTextFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/", jsonObject, null, JSONArchitecture.DefaultRobotController_Notation);
+        if(filePath == null) {
+            appendJSONToTextFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/", jsonObject, null, JSONArchitecture.DefaultRobotController_Notation);
+        } else {
+            appendJSONToTextFile(fileName, filePath, jsonObject, null, JSONArchitecture.DefaultRobotController_Notation);
+        }
     }
 
 

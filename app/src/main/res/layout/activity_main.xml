@@ -64,6 +64,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:fab_size="mini"
+                    app:fab_colorDisabled="#404040"
                     android:src="@drawable/ic_file_upload_black_24dp"
                     app:fab_colorNormal="@color/colorAccent"
                     app:fab_colorRipple="@color/colorAccent"

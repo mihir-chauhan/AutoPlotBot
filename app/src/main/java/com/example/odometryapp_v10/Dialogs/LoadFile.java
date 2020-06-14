@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -36,7 +37,7 @@ public class LoadFile extends AppCompatDialogFragment {
         final LayoutInflater inflater = getActivity().getLayoutInflater();
         view = inflater.inflate(R.layout.load_file_dialog, null);
         Spinner programSelectorSpinner = view.findViewById(R.id.loadFileSpinner);
-        List<String> allProgramNames = new ArrayList<>();
+        List<String> allProgramNames;
 
         builder.setView(view).setTitle("Load Program").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -70,6 +71,18 @@ public class LoadFile extends AppCompatDialogFragment {
         final ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(view.getContext(), android.R.layout.simple_spinner_item, spinnerArray);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         programSelectorSpinner.setAdapter(spinnerAdapter);
+
+        programSelectorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         return builder.create();
     }

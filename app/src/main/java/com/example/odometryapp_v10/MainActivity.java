@@ -229,6 +229,11 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         }).attachToRecyclerView(recyclerView);
     }
 
+    private void changeRecyclerViewLayout() {
+        RecyclerViewAdapter.isSecondaryRecyclerView_View = !RecyclerViewAdapter.isSecondaryRecyclerView_View;
+        buildRecyclerView();
+    }
+
     private void addToRecyclerView(String functionName, ArrayList<FunctionReturnFormat> functionParameters) {
         StringBuilder parametersOfFunction = new StringBuilder();
 

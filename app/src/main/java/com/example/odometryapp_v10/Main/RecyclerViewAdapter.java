@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.RecyclerViewHolder> {
     private ArrayList<RecyclerViewItem> recyclerViewItems;
     private OnItemClickListener listener;
+    public static boolean isSecondaryRecyclerView_View = false;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -53,9 +54,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @NonNull
     @Override
     public RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_item, parent, false);
-        RecyclerViewHolder recyclerViewHolder = new RecyclerViewHolder(v, listener);
-        return recyclerViewHolder;
+        if(isSecondaryRecyclerView_View) {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.secondary_recyclerview_item, parent, false);
+            RecyclerViewHolder recyclerViewHolder = new RecyclerViewHolder(v, listener);
+            return recyclerViewHolder;
+        } else {
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_item, parent, false);
+            RecyclerViewHolder recyclerViewHolder = new RecyclerViewHolder(v, listener);
+            return recyclerViewHolder;
+        }
     }
 
     @Override
@@ -63,6 +70,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         RecyclerViewItem recyclerViewItem = recyclerViewItems.get(position);
         holder.functionNameTextView.setText(recyclerViewItem.getFunctionName());
         holder.functionParametersTextView.setText(recyclerViewItem.getFunctionParameters());
+        if(holder.functionParametersTextView.getText().toString().isEmpty()) {
+            holder.functionParametersTextView.setVisibility(View.GONE);
+        }
     }
 
     @Override

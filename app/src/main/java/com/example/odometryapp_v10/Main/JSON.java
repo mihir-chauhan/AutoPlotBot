@@ -34,8 +34,10 @@ public class JSON {
         FileOutputStream outputStream;
         try {
             if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
+                System.out.println("RC NOTATION WHEN WRITING TO FILE");
                 fileJSONObject.put("program", jsonArray);
             } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
+                System.out.println("NONONONONONO RC NOTATION WHEN WRITING TO FILE");
                 fileJSONObject.put("function", jsonArray);
             }
         } catch (Exception e) {
@@ -212,7 +214,11 @@ public class JSON {
                 }
             }
             JSONObject jObject = new JSONObject();
-            jObject.put("function", list);
+            if(jsonArchitecture == JSONArchitecture.Function_Notation) {
+                jObject.put("function", list);
+            } else {
+                jObject.put("program", list);
+            }
             writeJSONToTextFile(fileName, filePath, jObject);
         } catch (JSONException e) {
             e.printStackTrace();

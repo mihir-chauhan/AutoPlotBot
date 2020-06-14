@@ -205,7 +205,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                String functionName = recyclerViewItemArrayList.get(deletedRowPosition).getFunctionName();
                 CoordinatorLayout coordinatorLayout = findViewById(R.id.coordinator);
                 Snackbar snackbar = Snackbar.make(coordinatorLayout, "Function deleted", Snackbar.LENGTH_SHORT)
                         .setAction("UNDO", new View.OnClickListener() {

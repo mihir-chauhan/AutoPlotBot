@@ -28,6 +28,7 @@ import com.example.odometryapp_v10.Main.JSON;
 import com.example.odometryapp_v10.Main.LoadFileReturnFormat;
 import com.example.odometryapp_v10.Main.RecyclerViewAdapter;
 import com.example.odometryapp_v10.Main.RecyclerViewItem;
+import com.github.sealstudios.fab.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
@@ -121,6 +122,17 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 loadFile.show(getSupportFragmentManager(), "loadFile");
             }
         });
+
+        com.github.sealstudios.fab.FloatingActionButton newProgram = findViewById(R.id.newProgram);
+        newProgram.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                recyclerViewItemArrayList.clear();
+                recyclerViewAdapter.notifyDataSetChanged();
+                doesHaveToCreateNewFile = true;
+            }
+        });
+
 
         canRunFABThread = true;
         enableOrDisableFAButtons();
@@ -443,6 +455,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     @Override
     public void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> fileFunctions) {
+        recyclerViewItemArrayList.clear();
+        recyclerViewAdapter.notifyDataSetChanged();
         isEditingLoadedFile = true;
         currentFileName = fileName;
         currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";

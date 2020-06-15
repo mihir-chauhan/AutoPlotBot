@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
@@ -24,6 +25,7 @@ import com.example.odometryapp_v10.Dialogs.LoadFile;
 import com.example.odometryapp_v10.Dialogs.SaveFile;
 import com.example.odometryapp_v10.Main.FunctionReturnFormat;
 import com.example.odometryapp_v10.Main.JSON;
+import com.example.odometryapp_v10.Main.LoadFileReturnFormat;
 import com.example.odometryapp_v10.Main.RecyclerViewAdapter;
 import com.example.odometryapp_v10.Main.RecyclerViewItem;
 import com.google.android.material.snackbar.Snackbar;
@@ -220,7 +222,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 recyclerViewItemArrayList.remove(deletedRowPosition);
                 recyclerViewAdapter.notifyDataSetChanged();
                 if(jsonArray != null) {
-                    System.out.println("position of removal: " + deletedRowPosition);
                     JSON.removeFromJSONTextFile(currentFileName, currentFilePath, deletedRowPosition, JSON.JSONArchitecture.DefaultRobotController_Notation);
                 } else {
                     throw new NullPointerException("Unable to find program file onDeletion (onSwiped) at Line: 224, Main Activity");
@@ -415,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     @Override
     public void saveProgram(String fileName) {
-        File currentFile = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/" + currentFileName + ".txt");
+        File currentFile = new File(currentFilePath + currentFileName + ".txt");
         File newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName);
         if (!fileName.contains(".txt")) {
             newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName + ".txt");
@@ -425,12 +426,20 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         if (currentFile.renameTo(newFileName)) {
 
         } else {
-            System.out.println("Failed to rename file");
         }
     }
 
     @Override
-    public void loadProgram() {
-
+    public void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> fileFunctions) {
+        currentFileName = fileName;
+        currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
+        doesHaveToCreateNewFile = false;
+        if(fileFunctions.size() >= 1) {
+            for (int i = 0; i < fileFunctions.size(); i++) {
+                addToRecyclerView(fileFunctions.get(i).functionName, fileFunctions.get(i).parameters);
+            }
+        } else {
+            Toast.makeText(this, "Selected file is empty", Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -34,10 +34,8 @@ public class JSON {
         FileOutputStream outputStream;
         try {
             if (fileArchitecture == JSONArchitecture.DefaultRobotController_Notation) {
-                System.out.println("RC NOTATION WHEN WRITING TO FILE");
                 fileJSONObject.put("program", jsonArray);
             } else if (fileArchitecture == JSONArchitecture.Function_Notation) {
-                System.out.println("NONONONONONO RC NOTATION WHEN WRITING TO FILE");
                 fileJSONObject.put("function", jsonArray);
             }
         } catch (Exception e) {

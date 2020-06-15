@@ -40,6 +40,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener, SaveFile.saveProgramListener, LoadFile.loadProgramListener {
     com.github.sealstudios.fab.FloatingActionButton callFunction;
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
     final ArrayList<RecyclerViewItem> recyclerViewItemArrayList = new ArrayList<>();
     boolean doesHaveToCreateNewFile = true;
+    boolean isEditingLoadedFile = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,9 +99,15 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         saveFunction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SaveFile saveFile = new SaveFile();
-                saveFile.setCancelable(false);
-                saveFile.show(getSupportFragmentManager(), "saveFile");
+                if(!isEditingLoadedFile) {
+                    SaveFile saveFile = new SaveFile();
+                    saveFile.setCancelable(false);
+                    saveFile.show(getSupportFragmentManager(), "saveFile");
+                } else {
+                    SaveFile saveFile = new SaveFile();
+                    saveFile.setCancelable(false);
+                    saveFile.show(getSupportFragmentManager(), "saveFile");
+                }
             }
         });
         saveFunction.setEnabled(false);
@@ -352,17 +360,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             String fileName = "program";
             if (!isEditing) {
                 if (doesHaveToCreateNewFile) {
-                    int fileNumber = 1;
-                    if (JSON.doesFileExist("program", null)) {
-                        boolean didFindNonexistentFile = false;
-                        while (!didFindNonexistentFile) {
-                            fileName = "program" + fileNumber;
-                            if (!JSON.doesFileExist(fileName, null)) {
-                                didFindNonexistentFile = true;
-                            }
-                            fileNumber++;
-                        }
-                    }
                     SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
                     Date date = new Date();
                     fileName += "-" + formatter.format(date);
@@ -416,21 +413,37 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     @Override
     public void saveProgram(String fileName) {
-        File currentFile = new File(currentFilePath + currentFileName + ".txt");
-        File newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName);
-        if (!fileName.contains(".txt")) {
-            newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName + ".txt");
-        }
-        currentFileName = newFileName.getName();
-        currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
-        if (currentFile.renameTo(newFileName)) {
-
+        if(isEditingLoadedFile) {
+            Toast.makeText(getApplicationContext(), "Since you are editing a loaded file, a duplicate will be made", Toast.LENGTH_LONG).show();
+            try {
+                JSONObject jsonObject = JSON.readJSONTextFile(currentFileName, currentFilePath);
+                JSONArray jsonArray = jsonObject.getJSONArray("program");
+                JSON.writeJSONToTextFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/", jsonArray, JSON.JSONArchitecture.DefaultRobotController_Notation);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            currentFileName = fileName.replace(".txt", "");
+            currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
+            isEditingLoadedFile = false;
         } else {
+            File currentFile = new File(currentFilePath + currentFileName + ".txt");
+            File newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName);
+            if (!fileName.contains(".txt")) {
+                newFileName = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/" + fileName + ".txt");
+            }
+
+            if (currentFile.renameTo(newFileName)) {
+                currentFileName = fileName.replace(".txt", "");
+                currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
+            } else {
+                System.out.println("Failed in renaming file");
+            }
         }
     }
 
     @Override
     public void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> fileFunctions) {
+        isEditingLoadedFile = true;
         currentFileName = fileName;
         currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
         doesHaveToCreateNewFile = false;

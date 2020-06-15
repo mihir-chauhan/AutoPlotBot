@@ -52,6 +52,7 @@ public class LoadFile extends AppCompatDialogFragment {
         }).setPositiveButton("done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                fileName = fileName.replace(".txt", "");
                 listener.loadProgram(fileName, returnFormatArrayList);
             }
         });

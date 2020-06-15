@@ -70,7 +70,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         RecyclerViewItem recyclerViewItem = recyclerViewItems.get(position);
         holder.functionNameTextView.setText(recyclerViewItem.getFunctionName());
         holder.functionParametersTextView.setText(recyclerViewItem.getFunctionParameters());
-        if(holder.functionParametersTextView.getText().toString().isEmpty()) {
+        if(holder.functionParametersTextView.getText().toString().isEmpty() && isSecondaryRecyclerView_View) {
             holder.functionParametersTextView.setVisibility(View.GONE);
         }
     }

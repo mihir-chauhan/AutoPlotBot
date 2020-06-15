@@ -234,7 +234,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                             public void onClick(View v) {
                                 recyclerViewItemArrayList.add(deletedRowPosition, currentItem);
                                 recyclerViewAdapter.notifyDataSetChanged();
-
+                                Toast.makeText(MainActivity.this, "UNDO function isn't complete - app will now crash (on purpose)", Toast.LENGTH_SHORT).show();
+                                throw new RuntimeException();
                             }
                         });
                 snackbar.show();

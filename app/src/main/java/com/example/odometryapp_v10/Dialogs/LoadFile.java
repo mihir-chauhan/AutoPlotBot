@@ -93,6 +93,7 @@ public class LoadFile extends AppCompatDialogFragment {
                             JSONArray functionsJSONArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
                             int functionPosition = JSON.returnFunctionPositionFromJSONArray(functionsJSONArray, functionName);
                             ArrayList<FunctionReturnFormat> functionFileParameters = new ArrayList<>();
+                            boolean isDrivetrain = functionsJSONArray.getJSONObject(functionPosition).getString("functionType").equals("Drivetrain");
                             Iterator<String> keys = functionsJSONArray.getJSONObject(functionPosition).getJSONObject("parameters").keys();
                             while (keys.hasNext()) {
                                 String key = keys.next();
@@ -105,10 +106,11 @@ public class LoadFile extends AppCompatDialogFragment {
                             if(jsonArray.getJSONObject(i).getJSONObject("parameters").length() >= 1) {
                                 for (int x = 0; x < jsonArray.getJSONObject(i).getJSONObject("parameters").length(); x++) {
                                     functionReturnFormatArrayList.add(new FunctionReturnFormat(functionFileParameters.get(x).parameterName, jsonArray.getJSONObject(i).getJSONObject("parameters").get(functionFileParameters.get(x).parameterName)));
+
                                 }
                             }
 
-                            returnFormatArrayList.add(new LoadFileReturnFormat(functionName, functionReturnFormatArrayList));
+                            returnFormatArrayList.add(new LoadFileReturnFormat(functionName, functionReturnFormatArrayList, isDrivetrain));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

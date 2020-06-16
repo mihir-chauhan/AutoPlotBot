@@ -6,9 +6,11 @@ public class LoadFileReturnFormat {
 
     public String functionName;
     public ArrayList<FunctionReturnFormat> parameters;
+    public boolean isDrivetrain;
 
-    public LoadFileReturnFormat(String functionName, ArrayList<FunctionReturnFormat> parameters) {
+    public LoadFileReturnFormat(String functionName, ArrayList<FunctionReturnFormat> parameters, boolean isDrivetrain) {
         this.functionName = functionName;
         this.parameters = parameters;
+        this.isDrivetrain = isDrivetrain;
     }
 }

@@ -1,11 +1,11 @@
 package com.example.odometryapp_v10.RobotSimulation.Skystone;
 
-import internal.Structure.Odometry;
-import internal.Structure.Path;
-import internal.Structure.Pose;
-import internal.Structure.PurePursuitController;
-import main.BackCalculation;
-import main.RobotSim;
+import com.example.odometryapp_v10.RobotSimulation.BackCalculation;
+import com.example.odometryapp_v10.RobotSimulation.RobotSim;
+import com.example.odometryapp_v10.RobotSimulation.Structure.Odometry;
+import com.example.odometryapp_v10.RobotSimulation.Structure.Path;
+import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
+import com.example.odometryapp_v10.RobotSimulation.Structure.PurePursuitController;
 
 public class MecanumDrivetrain {
 	private static double previousDistance;
@@ -237,7 +237,7 @@ public class MecanumDrivetrain {
 
 //	static RobotSim rs;
 
-	public static void startBackgroundPositionUpdates(Path path, double movementPower) {
+	public static void startBackgroundPositionUpdates(final Path path, double movementPower) {
 //		rs = new RobotSim();
 		mecanumThread = new Thread(new Runnable() {
 			@Override

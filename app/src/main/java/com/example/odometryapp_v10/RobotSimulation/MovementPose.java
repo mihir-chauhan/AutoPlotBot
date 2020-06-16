@@ -1,6 +1,7 @@
 package com.example.odometryapp_v10.RobotSimulation;
 
-import internal.Structure.Pose;
+
+import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
 
 public class MovementPose {
 

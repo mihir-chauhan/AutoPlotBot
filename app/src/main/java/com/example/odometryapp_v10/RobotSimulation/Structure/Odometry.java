@@ -1,11 +1,8 @@
 package com.example.odometryapp_v10.RobotSimulation.Structure;
 
-import internal.Skystone.MecanumDrivetrain;
-//import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-//import org.firstinspires.ftc.robotcore.external.Telemetry;
-//import org.firstinspires.ftc.teamcode.Robot.Skystone.MecanumDrivetrain;
-import main.BackCalculation;
-import main.RobotSim;
+import com.example.odometryapp_v10.RobotSimulation.BackCalculation;
+import com.example.odometryapp_v10.RobotSimulation.RobotSim;
+import com.example.odometryapp_v10.RobotSimulation.Skystone.MecanumDrivetrain;
 
 public class Odometry {
 

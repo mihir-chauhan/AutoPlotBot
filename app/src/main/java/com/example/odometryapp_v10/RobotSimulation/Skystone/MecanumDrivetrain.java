@@ -165,12 +165,12 @@ public class MecanumDrivetrain {
             targetHeading -= Math.toRadians(360);
         }
         while (Math.abs(targetHeading - currAngle) > 0.0175) {
-            if (targetHeading - currAngle > Math.toRadians(1)) {
+            if (targetHeading - currAngle > Math.toRadians(2)) {
                 BackCalculation.setFrontLeftPower(-inputPower);
                 BackCalculation.setFrontRightPower(inputPower);
                 BackCalculation.setBackLeftPower(-inputPower);
                 BackCalculation.setBackRightPower(inputPower);
-            } else if (targetHeading - currAngle < Math.toRadians(1)) {
+            } else if (targetHeading - currAngle < Math.toRadians(2)) {
                 BackCalculation.setFrontLeftPower(inputPower);
                 BackCalculation.setFrontRightPower(-inputPower);
                 BackCalculation.setBackLeftPower(inputPower);

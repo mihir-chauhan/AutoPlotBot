@@ -94,6 +94,6 @@ public class RobotSim {
         BackCalculation.setFrontRightPower(0.0);
         odometry.startBackgroundPositionUpdates();
 
-        MecanumDrivetrain.startBackgroundPositionUpdates(movementCoordinates, 0.1);
+        MecanumDrivetrain.startBackgroundPositionUpdates(movementCoordinates, 0.2);
     }
 }

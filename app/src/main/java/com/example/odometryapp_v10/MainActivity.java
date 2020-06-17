@@ -33,6 +33,7 @@ import com.example.odometryapp_v10.Main.RecyclerViewAdapter;
 import com.example.odometryapp_v10.Main.RecyclerViewItem;
 import com.example.odometryapp_v10.RobotSimulation.MovementPose;
 import com.example.odometryapp_v10.RobotSimulation.RobotSim;
+import com.example.odometryapp_v10.RobotSimulation.Structure.Odometry;
 import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
 import com.github.sealstudios.fab.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     private static CanvasRobotDrawer drawer;
     private ArrayList<MovementPose> robotSimulatorMovementCoordinates;
     RobotSim robotSim;
+    boolean didSendRobotSimCommand = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,7 +160,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         playProgram.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                robotSim = new RobotSim(getApplicationContext(), view, new Pose(10, 10, Math.toRadians(90)), MainActivity.this);
                 robotSim.startMovement(robotSimulatorMovementCoordinates);
+                didSendRobotSimCommand = true;
             }
         });
 
@@ -382,6 +386,13 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                             } else {
                                 playProgram.setEnabled(false);
                             }
+
+                            if(Odometry.runThread && didSendRobotSimCommand) {
+                                playProgram.setEnabled(false);
+                            } else {
+                                didSendRobotSimCommand = false;
+                                playProgram.setEnabled(true);
+                            }
                         }
                     });
                     try {
@@ -585,6 +596,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     }
                     allCoordinates.add(new Coordinate(x, y));
                     drawer.drawPointAt(allCoordinates);
+                    robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.moveForward));
                 }
             }
         } else {

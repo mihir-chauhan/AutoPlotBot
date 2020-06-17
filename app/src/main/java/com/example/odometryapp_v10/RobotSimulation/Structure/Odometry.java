@@ -68,10 +68,11 @@ public class Odometry {
 
 
 	Pose updatedPosition;
-	static boolean runThread = true;
+	public static boolean runThread = true;
 	static Thread backgroundPositionThread;
 
 	public void startBackgroundPositionUpdates() {
+		runThread = true;
 		backgroundPositionThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -80,6 +81,7 @@ public class Odometry {
 					updatedPosition = getCurrentPose();
 					RobotSim.setPosition(updatedPosition, (float) updatedPosition.heading);
 				}
+				System.out.println("THREAD Finished!!!!");
 			}
 		});
 		backgroundPositionThread.setPriority(Thread.MAX_PRIORITY);
@@ -95,6 +97,7 @@ public class Odometry {
 		} catch (Exception ignore) {
 
 		}
+		System.out.println("THREAD Finished");
 	}
 
 	public void sleep(long ms) {

@@ -10,27 +10,20 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.View;
 import android.widget.ImageView;
-
-import com.example.odometryapp_v10.MainActivity;
 import com.example.odometryapp_v10.R;
-import com.example.odometryapp_v10.RobotSimulation.RobotSim;
-import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
-
 import java.util.ArrayList;
 
 public class CanvasRobotDrawer {
-    public static boolean canRunDrawingThread;
     private Context context;
     private View view;
     private Canvas canvas;
     private Paint paint;
-
+    private Activity activity;
 
     public CanvasRobotDrawer(Context context, View view, Activity activity) {
         this.context = context;
         this.view = view;
-        canRunDrawingThread = true;
-        new RobotSim(context, view, new Pose(24, 48, Math.toRadians(90)), activity);
+        this.activity = activity;
     }
 
 

@@ -12,7 +12,7 @@ public class MovementPose {
 	public Pose position;
 	public MovementType movementType;
 
-	MovementPose(Pose position, MovementType movementType) {
+	public MovementPose(Pose position, MovementType movementType) {
 		this.position = position;
 		this.movementType = movementType;
 	}

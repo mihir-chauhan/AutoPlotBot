@@ -45,9 +45,13 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     CustomListViewAdapter adapter = new CustomListViewAdapter();
     public static boolean canSetSelectionOfFunctionSelector = false;
     public static boolean isEditingFunction;
-
+    private MovementType movementType;
     private enum ParameterTypes {
         String, Integer, Double, Boolean
+    }
+
+    private enum MovementType {
+        TankForward, TankBackward, Strafe, None
     }
 
     @Override
@@ -71,7 +75,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         }).setPositiveButton("done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                if(functionSelectorSpinner.getSelectedItemPosition() == 0) {
+                if (functionSelectorSpinner.getSelectedItemPosition() == 0) {
                     Toast.makeText(getContext(), "No function is being called", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -79,10 +83,10 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                 for (int parameters = 0; parameters < numberOfParameters; parameters++) {
                     String functionName = parameterNames.get(parameters);
                     Object functionParameter;
-                    if(parameterTypes.get(parameters).equals("Boolean")) {
+                    if (parameterTypes.get(parameters).equals("Boolean")) {
                         functionParameter = (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), true));
                     } else {
-                        if(adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false).equals("")) {
+                        if (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false).equals("")) {
                             Toast.makeText(getContext(), "One or more fields are blank", Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -92,7 +96,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                     parametersArray.add(new FunctionReturnFormat(functionName, functionParameter));
                 }
                 //returns array of format: [["parameterName", "parameterValue"], ["...", "..."], ["...", "..."], ...]
-                listener.callFunction(selectedFunctionName, parametersArray, isSelectedFunctionADrivetrainFunction, isEditingFunction, positionToEDIT);
+                listener.callFunction(selectedFunctionName, parametersArray, isSelectedFunctionADrivetrainFunction, isEditingFunction, positionToEDIT, movementType.toString());
             }
         });
         canSetSelectionOfFunctionSelector = true;
@@ -156,7 +160,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
 
     public interface callFunctionListener {
-        void callFunction(String functionName, ArrayList<FunctionReturnFormat> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int funtionPosition);
+        void callFunction(String functionName, ArrayList<FunctionReturnFormat> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int funtionPosition, String movementType);
     }
 
     String selectedFunctionName;
@@ -174,6 +178,17 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                 if (jsonArray != null) {
                     int i = returnPositionFromJSONArray(jsonArray, functionName);
                     isSelectedFunctionADrivetrainFunction = jsonArray.getJSONObject(i).getString("functionType").equals("Drivetrain");
+                    try {
+                        if (jsonArray.getJSONObject(i).getString("movementType").equals("Tank Forward")) {
+                            movementType = MovementType.TankForward;
+                        } else if (jsonArray.getJSONObject(i).getString("movementType").equals("Tank Backward")) {
+                            movementType = MovementType.TankBackward;
+                        } else if (jsonArray.getJSONObject(i).getString("movementType").equals("Strafe")) {
+                            movementType = MovementType.Strafe;
+                        }
+                    } catch (Exception ignore) {
+                        movementType = MovementType.None;
+                    }
                     if (i != -1) {
                         parameterTypes.clear();
                         parameterNames.clear();
@@ -271,9 +286,9 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
             }
 
-            if(isEditingFunction) {
-                if(parametersIF_EDITING.get(position).get(1).toString().equals("true") || parametersIF_EDITING.get(position).get(1).toString().equals("false")) {
-                    if(parametersIF_EDITING.get(position).get(1).toString().equals("true")) {
+            if (isEditingFunction) {
+                if (parametersIF_EDITING.get(position).get(1).toString().equals("true") || parametersIF_EDITING.get(position).get(1).toString().equals("false")) {
+                    if (parametersIF_EDITING.get(position).get(1).toString().equals("true")) {
                         holder.booleanSwitch.setChecked(true);
                     } else {
                         holder.booleanSwitch.setChecked(false);
@@ -305,12 +320,12 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
         public Object getParameterNamesFromView(View view, boolean isBoolean) {
 
-            if(!isBoolean) {
+            if (!isBoolean) {
                 try {
                     Scanner scanner = new Scanner(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
                     if (scanner.hasNextInt()) {
                         return Integer.parseInt(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
-                    } else if(scanner.hasNextDouble()) {
+                    } else if (scanner.hasNextDouble()) {
                         return Double.parseDouble(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
                     } else {
                         return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();

@@ -40,7 +40,6 @@ public class RobotSim {
         this.activity = activity;
         odometry = new Odometry(startingPosition);
         this.startingPosition = startingPosition;
-        startMovement();
     }
 
     private static Odometry odometry;
@@ -86,18 +85,13 @@ public class RobotSim {
         });
     }
 
-    public void startMovement() {
-        BackCalculation.timeStampLeft = BackCalculation.timeStampCenter = BackCalculation.timeStampRight = System
-                .currentTimeMillis();
+    public void startMovement(ArrayList<MovementPose> movementCoordinates) {
+        BackCalculation.timeStampLeft = BackCalculation.timeStampCenter = BackCalculation.timeStampRight = System.currentTimeMillis();
         BackCalculation.setBackLeftPower(0.0);
         BackCalculation.setFrontLeftPower(0.0);
         BackCalculation.setBackRightPower(0.0);
         BackCalculation.setFrontRightPower(0.0);
         odometry.startBackgroundPositionUpdates();
-
-        ArrayList<MovementPose> movementCoordinates = new ArrayList<>();
-
-        movementCoordinates.add(new MovementPose(new Pose(70, 70, Math.toRadians(180)), MovementPose.MovementType.moveBackward));
 
         MecanumDrivetrain.startBackgroundPositionUpdates(movementCoordinates, 0.1);
     }

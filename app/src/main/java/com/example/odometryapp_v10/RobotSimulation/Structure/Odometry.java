@@ -1,5 +1,7 @@
 package com.example.odometryapp_v10.RobotSimulation.Structure;
 
+import com.example.odometryapp_v10.Main.CanvasRobotDrawer;
+import com.example.odometryapp_v10.MainActivity;
 import com.example.odometryapp_v10.RobotSimulation.BackCalculation;
 import com.example.odometryapp_v10.RobotSimulation.RobotSim;
 import com.example.odometryapp_v10.RobotSimulation.Skystone.MecanumDrivetrain;
@@ -64,10 +66,10 @@ public class Odometry {
 				currentHeading);
 	}
 
-	Thread backgroundPositionThread;
 
 	Pose updatedPosition;
-	boolean runThread = true;
+	static boolean runThread = true;
+	static Thread backgroundPositionThread;
 
 	public void startBackgroundPositionUpdates() {
 		backgroundPositionThread = new Thread(new Runnable() {
@@ -78,7 +80,6 @@ public class Odometry {
 					updatedPosition = getCurrentPose();
 					RobotSim.setPosition(updatedPosition, (float) updatedPosition.heading);
 				}
-				backgroundPositionThread.interrupt();
 			}
 		});
 		backgroundPositionThread.setPriority(Thread.MAX_PRIORITY);
@@ -88,6 +89,12 @@ public class Odometry {
 
 	public void stopBackgroundPositionUpdates() {
 		runThread = false;
+
+		try {
+			backgroundPositionThread.interrupt();
+		} catch (Exception ignore) {
+
+		}
 	}
 
 	public void sleep(long ms) {

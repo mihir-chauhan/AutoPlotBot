@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -30,6 +31,9 @@ import com.example.odometryapp_v10.Main.JSON;
 import com.example.odometryapp_v10.Main.LoadFileReturnFormat;
 import com.example.odometryapp_v10.Main.RecyclerViewAdapter;
 import com.example.odometryapp_v10.Main.RecyclerViewItem;
+import com.example.odometryapp_v10.RobotSimulation.MovementPose;
+import com.example.odometryapp_v10.RobotSimulation.RobotSim;
+import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
 import com.github.sealstudios.fab.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -51,21 +55,29 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     com.github.sealstudios.fab.FloatingActionButton editFunction;
     com.github.sealstudios.fab.FloatingActionButton saveFunction;
     com.github.sealstudios.fab.FloatingActionButton loadFunction;
+    com.github.sealstudios.fab.FloatingActionButton playProgram;
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
     private RecyclerView.LayoutManager recyclerViewLayoutManager;
     final ArrayList<RecyclerViewItem> recyclerViewItemArrayList = new ArrayList<>();
-    final ArrayList<Coordinate> allCoordinates = new ArrayList<>();
+    public static final ArrayList<Coordinate> allCoordinates = new ArrayList<>();
     boolean doesHaveToCreateNewFile = true;
     boolean isEditingLoadedFile = false;
-    private CanvasRobotDrawer drawer;
+    private static CanvasRobotDrawer drawer;
+    private ArrayList<MovementPose> robotSimulatorMovementCoordinates;
+    RobotSim robotSim;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+
+        robotSimulatorMovementCoordinates = new ArrayList<>();
+
+        final View view = findViewById(android.R.id.content).getRootView();
+        robotSim = new RobotSim(getApplicationContext(), view, new Pose(10, 10, Math.toRadians(90)), MainActivity.this);
 
         checkForWritePermission();
 
@@ -107,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         saveFunction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!isEditingLoadedFile) {
+                if (!isEditingLoadedFile) {
                     SaveFile saveFile = new SaveFile();
                     saveFile.setCancelable(false);
                     saveFile.show(getSupportFragmentManager(), "saveFile");
@@ -142,6 +154,13 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             }
         });
 
+        playProgram = findViewById(R.id.playProgram);
+        playProgram.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                robotSim.startMovement(robotSimulatorMovementCoordinates);
+            }
+        });
 
         canRunFABThread = true;
         enableOrDisableFAButtons();
@@ -226,6 +245,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 Collections.swap(allCoordinates, fromPosition, toPosition);
                 drawer.drawPointAt(allCoordinates);
 
+                //TODO: add swapping for robotSimulatorMovementCoordinates if the two swapped are movementtypes
+
                 return true;
             }
 
@@ -233,7 +254,17 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
                 final int deletedRowPosition = viewHolder.getAdapterPosition();
                 final RecyclerViewItem currentItem = recyclerViewItemArrayList.get(deletedRowPosition);
-                final Coordinate currentCoordinate = allCoordinates.get(deletedRowPosition);
+                MovementPose currentMP = null;
+                Coordinate currentC = null;
+                try {
+                    currentMP = robotSimulatorMovementCoordinates.get(deletedRowPosition);
+                    currentC = allCoordinates.get(deletedRowPosition);
+                } catch (Exception ignore) {
+                }
+
+                final MovementPose movementPose = currentMP;
+                final Coordinate currentCoordinate = currentC;
+
                 JSONArray jsonArray = null;
                 try {
                     jsonArray = JSON.readJSONTextFile(currentFileName, currentFilePath).getJSONArray("program");
@@ -248,18 +279,28 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                             public void onClick(View v) {
                                 recyclerViewItemArrayList.add(deletedRowPosition, currentItem);
                                 recyclerViewAdapter.notifyDataSetChanged();
-                                allCoordinates.add(deletedRowPosition, currentCoordinate);
-                                drawer.drawPointAt(allCoordinates);
+                                if (currentCoordinate != null) {
+                                    allCoordinates.add(deletedRowPosition, currentCoordinate);
+                                    drawer.drawPointAt(allCoordinates);
+                                }
+                                if (movementPose != null) {
+                                    robotSimulatorMovementCoordinates.add(deletedRowPosition, movementPose);
+                                }
                                 JSON.writeJSONToTextFile(currentFileName, currentFilePath, currentJSONArray, JSON.JSONArchitecture.DefaultRobotController_Notation);
                             }
                         });
                 snackbar.show();
 
-                allCoordinates.remove(deletedRowPosition);
                 drawer.drawPointAt(allCoordinates);
+                if (recyclerViewItemArrayList.get(deletedRowPosition).getFunctionParameters().contains("x:")) {
+                    if (recyclerViewItemArrayList.get(deletedRowPosition).getFunctionParameters().contains("y:")) {
+                        robotSimulatorMovementCoordinates.remove(deletedRowPosition);
+                        allCoordinates.remove(deletedRowPosition);
+                    }
+                }
                 recyclerViewItemArrayList.remove(deletedRowPosition);
                 recyclerViewAdapter.notifyDataSetChanged();
-                if(jsonArray != null) {
+                if (jsonArray != null) {
                     JSON.removeFromJSONTextFile(currentFileName, currentFilePath, deletedRowPosition, JSON.JSONArchitecture.DefaultRobotController_Notation);
                 } else {
                     throw new NullPointerException("Unable to find program file onDeletion (onSwiped) at Line: 224, Main Activity");
@@ -330,12 +371,17 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                                 }
                             };
 
-                            if(f.list(filter).length >= 1) {
+                            if (f.list(filter).length >= 1) {
                                 loadFunction.setEnabled(true);
                             } else {
                                 loadFunction.setEnabled(false);
                             }
 
+                            if (robotSimulatorMovementCoordinates.size() >= 1) {
+                                playProgram.setEnabled(true);
+                            } else {
+                                playProgram.setEnabled(false);
+                            }
                         }
                     });
                     try {
@@ -359,11 +405,14 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     @Override
-    public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType) {
+    public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType, String movementType) {
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("functionName", functionName);
             jsonObject.put("functionType", functionType);
+            if (movementType != null) {
+                jsonObject.put("movementType", movementType);
+            }
             JSONObject paramObject = new JSONObject();
             for (int parameter = 0; parameter < allParameters.size(); parameter++) {
                 paramObject.put(allParameters.get(parameter).get(0).toString(), allParameters.get(parameter).get(1).toString());
@@ -382,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     String currentFilePath;
 
     @Override
-    public void callFunction(String functionName, ArrayList<FunctionReturnFormat> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int positionOfEdit) {
+    public void callFunction(String functionName, ArrayList<FunctionReturnFormat> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int positionOfEdit, String movementType) {
         ArrayList<Object> nullValidation = new ArrayList<>();
         nullValidation.add(functionName);
         nullValidation.add(functionParameters);
@@ -410,22 +459,35 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                         JSON.addFunctionFromProgramToFile(currentFileName, functionName, functionParameters, Environment.getExternalStorageDirectory() + "/Innov8rz/");
                     }
                 }
-                if(isDrivetrainFunction) {
-                    double x = 0,y = 0;
-                    for(int i = 0; i < functionParameters.size(); i++) {
-                        if(functionParameters.get(i).parameterName.equals("x")) {
-                            if(functionParameters.get(i).parameterValue instanceof Integer) {
+                if (isDrivetrainFunction) {
+                    double x = 0, y = 0, theta = 0;
+                    for (int i = 0; i < functionParameters.size(); i++) {
+                        if (functionParameters.get(i).parameterName.equals("x")) {
+                            if (functionParameters.get(i).parameterValue instanceof Integer) {
                                 x = (double) ((Integer) functionParameters.get(i).parameterValue).intValue();
                             } else {
                                 x = (double) functionParameters.get(i).parameterValue;
                             }
-                        } else if(functionParameters.get(i).parameterName.equals("y")) {
-                            if(functionParameters.get(i).parameterValue instanceof Integer) {
+                        } else if (functionParameters.get(i).parameterName.equals("y")) {
+                            if (functionParameters.get(i).parameterValue instanceof Integer) {
                                 y = (double) ((Integer) functionParameters.get(i).parameterValue).intValue();
                             } else {
                                 y = (double) functionParameters.get(i).parameterValue;
                             }
+                        } else if (functionParameters.get(i).parameterName.equals("heading")) {
+                            if (functionParameters.get(i).parameterValue instanceof Integer) {
+                                theta = (double) ((Integer) functionParameters.get(i).parameterValue).intValue();
+                            } else {
+                                theta = (double) functionParameters.get(i).parameterValue;
+                            }
                         }
+                    }
+                    if (movementType.equals("Strafe")) {
+                        robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(theta)), MovementPose.MovementType.strafe));
+                    } else if (movementType.equals("TankForward")) {
+                        robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveForward));
+                    } else if (movementType.equals("TankBackward")) {
+                        robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveBackward));
                     }
                     allCoordinates.add(new Coordinate(x, y));
                     drawer.drawPointAt(allCoordinates);
@@ -464,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     @Override
     public void saveProgram(String fileName) {
-        if(isEditingLoadedFile) {
+        if (isEditingLoadedFile) {
             Toast.makeText(getApplicationContext(), "Since you are editing a loaded file, a duplicate will be made", Toast.LENGTH_LONG).show();
             try {
                 JSONObject jsonObject = JSON.readJSONTextFile(currentFileName, currentFilePath);
@@ -501,20 +563,20 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         currentFileName = fileName;
         currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
         doesHaveToCreateNewFile = false;
-        if(fileFunctions.size() >= 1) {
+        if (fileFunctions.size() >= 1) {
             for (int i = 0; i < fileFunctions.size(); i++) {
                 addToRecyclerView(fileFunctions.get(i).functionName, fileFunctions.get(i).parameters);
-                if(fileFunctions.get(i).isDrivetrain) {
-                    double x = 0,y = 0;
-                    for(int a = 0; a < fileFunctions.get(i).parameters.size(); a++) {
-                        if(fileFunctions.get(i).parameters.get(a).parameterName.equals("x")) {
-                            if(fileFunctions.get(i).parameters.get(a).parameterValue instanceof Integer) {
+                if (fileFunctions.get(i).isDrivetrain) {
+                    double x = 0, y = 0;
+                    for (int a = 0; a < fileFunctions.get(i).parameters.size(); a++) {
+                        if (fileFunctions.get(i).parameters.get(a).parameterName.equals("x")) {
+                            if (fileFunctions.get(i).parameters.get(a).parameterValue instanceof Integer) {
                                 x = (double) ((Integer) fileFunctions.get(i).parameters.get(a).parameterValue).intValue();
                             } else {
                                 x = (double) fileFunctions.get(i).parameters.get(a).parameterValue;
                             }
-                        } else if(fileFunctions.get(i).parameters.get(a).parameterName.equals("y")) {
-                            if(fileFunctions.get(i).parameters.get(a).parameterValue instanceof Integer) {
+                        } else if (fileFunctions.get(i).parameters.get(a).parameterName.equals("y")) {
+                            if (fileFunctions.get(i).parameters.get(a).parameterValue instanceof Integer) {
                                 y = (double) ((Integer) fileFunctions.get(i).parameters.get(a).parameterValue).intValue();
                             } else {
                                 y = (double) fileFunctions.get(i).parameters.get(a).parameterValue;

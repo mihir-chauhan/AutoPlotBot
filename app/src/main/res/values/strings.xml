@@ -14,4 +14,11 @@
         <item>Accessory</item>
         <item>Other</item>
     </string-array>
+    <string-array name="drivetrainMovementTypes">
+        <item>Drivetrain Movement Type</item>
+        <item>Tank Forward</item>
+        <item>Tank Backward</item>
+        <item>Strafe</item>
+<!--        <item>Pure Pursuit</item>-->
+    </string-array>
 </resources>

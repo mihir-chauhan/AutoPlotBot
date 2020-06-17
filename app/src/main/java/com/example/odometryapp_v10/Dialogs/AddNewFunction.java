@@ -35,6 +35,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
     View view;
     boolean drivetrainFunctionProtocol = false;
     boolean canRemoveFromSavedParametersArrayList = false;
+    boolean isStrafing = false;
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
@@ -45,6 +46,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
         functionName = view.findViewById(R.id.addNewFunctionName);
         final ArrayList<ArrayList<Object>> allParameters = new ArrayList<>();
         final Spinner functionTypeSelector = view.findViewById(R.id.functionTypeSelector);
+        final Spinner drivetrainMovementSelector = view.findViewById(R.id.drivetrainFunctionType);
 
         final CustomListViewAdapter adapter = new CustomListViewAdapter();
 
@@ -54,12 +56,41 @@ public class AddNewFunction extends AppCompatDialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 1) {
+                    drivetrainMovementSelector.setVisibility(View.VISIBLE);
                     numberOfParameters = 2;
                     drivetrainFunctionProtocol = true;
+                    savedParameters.clear();
                     adapter.notifyDataSetChanged();
                 } else {
+                    drivetrainMovementSelector.setVisibility(View.INVISIBLE);
                     numberOfParameters = 0;
                     drivetrainFunctionProtocol = false;
+                    savedParameters.clear();
+                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        drivetrainMovementSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if(position == 3) {
+                    savedParameters.clear();
+                    isStrafing = true;
+                    numberOfParameters = 3;
+                    adapter.notifyDataSetChanged();
+                } else {
+                    savedParameters.clear();
+                    numberOfParameters = 0;
+                    if(drivetrainFunctionProtocol) {
+                        numberOfParameters = 2;
+                    }
+                    isStrafing = false;
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -110,7 +141,16 @@ public class AddNewFunction extends AppCompatDialogFragment {
                         Toast.makeText(getContext(), "Function type is undefined", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    listener.addNewFunction(functionName.getText().toString(), allParameters, functionTypeSelector.getSelectedItem().toString());
+                    if(drivetrainMovementSelector.getVisibility() == View.VISIBLE) {
+                        if(drivetrainMovementSelector.getSelectedItemPosition() == 0) {
+                            Toast.makeText(getContext(), "Drivetrain Movement type is undefined", Toast.LENGTH_SHORT).show();
+                            return;
+                        } else {
+                            listener.addNewFunction(functionName.getText().toString(), allParameters, functionTypeSelector.getSelectedItem().toString(), drivetrainMovementSelector.getSelectedItem().toString());
+                        }
+                    } else {
+                        listener.addNewFunction(functionName.getText().toString(), allParameters, functionTypeSelector.getSelectedItem().toString(), null);
+                    }
                 } else {
                     Toast.makeText(getContext(), "Function name is undefined", Toast.LENGTH_SHORT).show();
                     return;
@@ -140,18 +180,31 @@ public class AddNewFunction extends AppCompatDialogFragment {
         removeParameters.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (canRemoveFromSavedParametersArrayList) {
-                    savedParameters.remove(savedParameters.size() - 1);
-                }
+                if(drivetrainFunctionProtocol) {
+                    if (canRemoveFromSavedParametersArrayList && numberOfParameters > 2) {
+                        savedParameters.remove(savedParameters.size() - 1);
+                    }
 
-                if (numberOfParameters > 0) {
-                    numberOfParameters--;
-                    canRemoveFromSavedParametersArrayList = true;
-                    adapter.notifyDataSetChanged();
+                    if (numberOfParameters > 2) {
+                        numberOfParameters--;
+                        canRemoveFromSavedParametersArrayList = true;
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(view.getContext(), "Unable to remove parameters", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Toast.makeText(view.getContext(), "Unable to remove parameters", Toast.LENGTH_SHORT).show();
-                }
+                    if (canRemoveFromSavedParametersArrayList && numberOfParameters > 0) {
+                        savedParameters.remove(savedParameters.size() - 1);
+                    }
 
+                    if (numberOfParameters > 0) {
+                        numberOfParameters--;
+                        canRemoveFromSavedParametersArrayList = true;
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(view.getContext(), "Unable to remove parameters", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
         return builder.create();
@@ -170,7 +223,7 @@ public class AddNewFunction extends AppCompatDialogFragment {
 
 
     public interface addNewFunctionListener {
-        void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType);
+        void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType, String movementType);
     }
 
     ArrayList<String> savedParameters = new ArrayList<>();
@@ -214,6 +267,10 @@ public class AddNewFunction extends AppCompatDialogFragment {
                 holder = (ViewHolder) convertView.getTag();
             }
 
+            holder.editText.setEnabled(true);
+            holder.spinner.setSelection(0);
+            holder.spinner.setEnabled(true);
+
             if (drivetrainFunctionProtocol) {
                 if (position == 0) {
                     holder.editText.setText("x");
@@ -222,6 +279,11 @@ public class AddNewFunction extends AppCompatDialogFragment {
                     holder.spinner.setEnabled(false);
                 } else if (position == 1) {
                     holder.editText.setText("y");
+                    holder.spinner.setSelection(3);
+                    holder.editText.setEnabled(false);
+                    holder.spinner.setEnabled(false);
+                } else if (position == 2 && isStrafing) {
+                    holder.editText.setText("heading");
                     holder.spinner.setSelection(3);
                     holder.editText.setEnabled(false);
                     holder.spinner.setEnabled(false);

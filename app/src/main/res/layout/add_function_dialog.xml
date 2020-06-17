@@ -16,12 +16,22 @@
 
     <Spinner
         android:id="@+id/functionTypeSelector"
-        android:layout_width="350dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/addNewFunctionName"
         android:entries="@array/functionTypes"
         android:hint="Function Type"/>
 
+    <Spinner
+        android:id="@+id/drivetrainFunctionType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_toRightOf="@+id/functionTypeSelector"
+        android:layout_below="@id/addNewFunctionName"
+        android:visibility="invisible"
+        android:entries="@array/drivetrainMovementTypes"
+        android:hint="Drivetrain Movement Type"/>
 
     <Button
         android:id="@+id/addParameters"

@@ -1,11 +1,12 @@
 package com.example.odometryapp_v10.RobotSimulation.Skystone;
 
 import com.example.odometryapp_v10.RobotSimulation.BackCalculation;
+import com.example.odometryapp_v10.RobotSimulation.MovementPose;
 import com.example.odometryapp_v10.RobotSimulation.RobotSim;
 import com.example.odometryapp_v10.RobotSimulation.Structure.Odometry;
-import com.example.odometryapp_v10.RobotSimulation.Structure.Path;
 import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
-import com.example.odometryapp_v10.RobotSimulation.Structure.PurePursuitController;
+
+import java.util.ArrayList;
 
 public class MecanumDrivetrain {
 	private static double previousDistance;
@@ -76,54 +77,25 @@ public class MecanumDrivetrain {
 		BackCalculation.setBackRightPower(0);
 	}
 
-	public static void strafeTowardsPosition(Pose targetPose, double movementPower) {
-		double angle1 = targetPose.heading;
-		double movementHeading = angle1;
-		double r = movementPower;// maxPower
-		double robotAngle, v1, v2, v3, v4;
-		double targetHeading = movementHeading;
-		double currAngle;
-		double subtractNumberForHeading;
-		resetOvershoot();
-		Pose currentPose = odometry.getCurrentPose();
-		long currentTime = System.currentTimeMillis();
-		double dist = currentPose.distanceToPose(targetPose);
-		while ((currentPose.distanceToPose(targetPose) > 1
-				&& !overshootDistance(currentPose.distanceToPose(targetPose)))) {
-			currentPose = odometry.getCurrentPose();
-			robotAngle = Math.atan2((targetPose.y - odometry.getCurrentPose().y),
-					(targetPose.x - odometry.getCurrentPose().x)) + Math.PI / 4 - odometry.getCurrentPose().heading;
-			v1 = r * Math.cos(robotAngle);
-			v2 = r * Math.sin(robotAngle);
-			v3 = r * Math.sin(robotAngle);
-			v4 = r * Math.cos(robotAngle);
-			currAngle = odometry.getCurrentPose().heading % (2 * Math.PI);
-			subtractNumberForHeading = (targetHeading - currAngle) / 4;
-			BackCalculation.setFrontLeftPower(v1 - subtractNumberForHeading);
-			BackCalculation.setFrontRightPower(v2 + subtractNumberForHeading);
-			BackCalculation.setBackLeftPower(v3 - subtractNumberForHeading);
-			BackCalculation.setBackRightPower(v4 + subtractNumberForHeading);
-			return;
-		}
-	}
-
-	public static void rampTankToPosition(Pose targetPose, double movementPower, TankDirection direction,
-			boolean stop) {
+	public static void rampTankToPosition(Pose targetPose, double movementPower, TankDirection direction) {
 		double angleToTravel = odometry.angleToTravel(targetPose, direction);
-//		turnToHeading(angleToTravel, movementPower);
-		tankToPosition(targetPose, movementPower, direction, stop);
-//		turnToHeading(angleToTravel, movementPower);
-		if (stop) {
-			BackCalculation.setFrontLeftPower(0);
-			BackCalculation.setFrontRightPower(0);
-			BackCalculation.setBackLeftPower(0);
-			BackCalculation.setBackRightPower(0);
-		}
+		System.out.println(angleToTravel);
+		turnToHeading(angleToTravel, movementPower);
+		tankToPosition(targetPose, movementPower, direction);
+		turnToHeading(angleToTravel, movementPower);
+		BackCalculation.setFrontLeftPower(0);
+		BackCalculation.setFrontRightPower(0);
+		BackCalculation.setBackLeftPower(0);
+		BackCalculation.setBackRightPower(0);
 	}
 
-	public static void tankToPosition(Pose targetPose, double movementPower, TankDirection direction, boolean stop) {
+	private static final double startPowerForRamp = 0.4;
+	private static final double rampInchConstant = 3;
+
+	public static void tankToPosition(Pose targetPose, double movementPower, TankDirection direction) {
 		Pose currentPosition = odometry.getCurrentPose();
 		double distance = currentPosition.distanceToPose(targetPose);
+		final double distanceFromStart = distance;
 		double currAngle = odometry.getCurrentPose().heading;
 
 		double deltaX = targetPose.x - odometry.getCurrentPose().x;
@@ -164,37 +136,73 @@ public class MecanumDrivetrain {
 		}
 		double powerToMove = (direction == TankDirection.backward) ? -1 * Math.abs(movementPower)
 				: Math.abs(movementPower);
+
 		double desiredHeading;
 		double gain = 0;
 		double error;
 
-		BackCalculation.setFrontLeftPower(movementPower);
-		BackCalculation.setFrontRightPower(movementPower);
-		BackCalculation.setBackLeftPower(movementPower);
-		BackCalculation.setBackRightPower(movementPower);
-
-		if (stop) {
-			return;
-		}
+		BackCalculation.setDrivetrainPower(powerToMove);
 
 		resetOvershoot();
 
+		boolean ramp = false;
+		if (distance >= 24) {
+			ramp = true;
+		}
+
 		long currentTime = System.currentTimeMillis();
+		double dist = currentPosition.distanceToPose(targetPose);
+
+		double previousDistance = distance;
+		double currentDistance = distance;
+		double rampStep = 0.0;
 		while ((currentPosition.distanceToPose(targetPose) > 0.5
 				&& !overshootDistance(currentPosition.distanceToPose(targetPose)))) {
+			if (currentTime + 1000 < System.currentTimeMillis()) {
+				if (Math.abs(dist - currentPosition.distanceToPose(targetPose)) < 0.5) {
+					break;
+				} else {
+					currentTime = System.currentTimeMillis();
+					dist = currentPosition.distanceToPose(targetPose);
+				}
+			}
+
 			currentPosition = odometry.getCurrentPose();
 
 			distance = currentPosition.distanceToPose(targetPose);
 			desiredHeading = odometry.angleToTravel(new Pose(ppX, ppY, targetPose.heading), direction);
 			currAngle = odometry.getCurrentPose().heading;
 
+			currentDistance = distance;
+
 			error = desiredHeading - currAngle;
 			gain = Math.atan2(Math.sin(error), Math.cos(error)) * odometryGainMultiplier;
-			BackCalculation.setFrontLeftPower(checkPower(powerToMove - gain, 0.6));
-			BackCalculation.setFrontRightPower(checkPower(powerToMove + gain, 0.6));
-			BackCalculation.setBackLeftPower(checkPower(powerToMove - gain, 0.6));
-			BackCalculation.setBackRightPower(checkPower(powerToMove + gain, 0.6));
-			return;
+
+			if (previousDistance - currentDistance > 1 && currentDistance >= distanceFromStart - rampInchConstant - 3) {
+				if (direction == TankDirection.backward) {
+					rampStep -= (Math.abs(powerToMove) - startPowerForRamp) / rampInchConstant;
+				} else {
+					rampStep += (Math.abs(powerToMove) - startPowerForRamp) / rampInchConstant;
+				}
+				previousDistance = currentDistance;
+			} else if (previousDistance - currentDistance > 1 && currentDistance <= rampInchConstant) {
+				if (direction == TankDirection.backward) {
+					rampStep += (Math.abs(powerToMove) - startPowerForRamp) / rampInchConstant;
+				} else {
+					rampStep -= (Math.abs(powerToMove) - startPowerForRamp) / rampInchConstant;
+				}
+				previousDistance = currentDistance;
+			}
+
+//            setLeftDrivetrainPower(powerToMove - gain);
+//            setRightDrivetrainPower(powerToMove + gain);
+			if (ramp) {
+				BackCalculation.setLeftDrivetrainPower(checkPower(startPowerForRamp - gain + rampStep, powerToMove));
+				BackCalculation.setRightDrivetrainPower(checkPower(startPowerForRamp + gain + rampStep, powerToMove));
+			} else {
+				BackCalculation.setLeftDrivetrainPower(checkPower(powerToMove - gain, 0.6));
+				BackCalculation.setRightDrivetrainPower(checkPower(powerToMove + gain, 0.6));
+			}
 		}
 	}
 
@@ -216,7 +224,6 @@ public class MecanumDrivetrain {
 				BackCalculation.setBackRightPower(-inputPower);
 			}
 			currAngle = odometry.getCurrentPose().heading % (2 * Math.PI);
-			return;
 		}
 
 		BackCalculation.setFrontLeftPower(0);
@@ -235,96 +242,27 @@ public class MecanumDrivetrain {
 		}
 	}
 
-//	static RobotSim rs;
-
-	public static void startBackgroundPositionUpdates(final Path path, double movementPower) {
-//		rs = new RobotSim();
+	public static void startBackgroundPositionUpdates(final ArrayList<MovementPose> targetCoordinates, final double movementPower) {
 		mecanumThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				System.out.println("Started Movement.");
-				executePath(path);
+				for (int i = 0; i < targetCoordinates.size(); i++) {
+					if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.strafe)) {
+						strafeToPosition(targetCoordinates.get(i).position, movementPower);
+					} else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.move)) {
+						rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.backward);
+					} else {
+						System.out.println("?");
+					}
+				}
 				System.out.println("Done Moving.");
+				odometry.stopBackgroundPositionUpdates();
 				mecanumThread.interrupt();
 			}
 		});
 		mecanumThread.setPriority(Thread.MAX_PRIORITY);
 		mecanumThread.setName("Odometry Background Position Thread");
 		mecanumThread.start();
-	}
-
-	static PurePursuitController purePursuitController = new PurePursuitController();
-
-	public static void executePath(Path path) {
-		purePursuitController.clearPath();
-		purePursuitController.setPath(path);
-		Pose targetPose = purePursuitController.getNextPose(odometry.getCurrentPose());
-		while (targetPose != null) {
-			if (purePursuitController.targetIsFinalPose()) {
-				calculatePowerFromPosition(odometry.getCurrentPose(), targetPose, path.power, true);
-				break;
-			} else {
-				calculatePowerFromPosition(odometry.getCurrentPose(), targetPose, path.power, false);
-			}
-			targetPose = purePursuitController.getNextPose(odometry.getCurrentPose());
-			sleep(10);
-		}
-	}
-
-	public static double closestAngle(double angle1, double angle2, double currentAngle) {
-		currentAngle += (Math.PI * 2);
-		currentAngle %= (Math.PI * 2);
-
-		double delta_angle1 = (Math.abs(currentAngle - angle1)); // + Math.PI) % (Math.PI);
-		double delta_angle2 = (Math.abs(currentAngle - angle2)); // + Math.PI) % (Math.PI);
-
-		if (delta_angle1 > Math.PI) {
-			delta_angle1 = 2 * Math.PI - delta_angle1;
-		}
-		if (delta_angle2 > Math.PI) {
-			delta_angle2 = 2 * Math.PI - delta_angle2;
-		}
-
-		if (delta_angle1 < delta_angle2) {
-			return angle1;
-		}
-		return angle2;
-	}
-
-	public static void calculatePowerFromPosition(Pose currentPosition, Pose targetPose, double powerToMove,
-			boolean stop) {
-		if (stop) {
-			BackCalculation.setFrontLeftPower(0.0);
-			BackCalculation.setFrontRightPower(0.0);
-			BackCalculation.setBackLeftPower(0.0);
-			BackCalculation.setBackRightPower(0.0);
-			return;
-		}
-		double distance = currentPosition.distanceToPose(targetPose);
-		double currAngle = odometry.getCurrentPose().heading;
-		double angle1 = odometry.angleToTravel(new Pose(targetPose.x, targetPose.y, targetPose.heading),
-				TankDirection.forward) % (Math.PI * 2);
-		double angle2 = odometry.angleToTravel(new Pose(targetPose.x, targetPose.y, targetPose.heading),
-				TankDirection.backward) % (Math.PI * 2);
-		double desiredHeading = closestAngle(angle1, angle2, currAngle);
-		System.out.println("angle1: " + angle1 + ", angle2: " + angle2 + ", currentAngle: " + currAngle
-				+ ", angleToTravel: " + desiredHeading);
-
-		if (desiredHeading == angle2) {
-			powerToMove *= -1;
-		}
-		double error = desiredHeading - currAngle;
-		double gain = Math.atan2(Math.sin(error), Math.cos(error)) * odometryGainMultiplier;
-		BackCalculation.setFrontLeftPower(checkPower(powerToMove - gain, 0.6));
-		BackCalculation.setFrontRightPower(checkPower(powerToMove + gain, 0.6));
-		BackCalculation.setBackLeftPower(checkPower(powerToMove - gain, 0.6));
-		BackCalculation.setBackRightPower(checkPower(powerToMove + gain, 0.6));
-		return;
-	}
-
-	public static void sleep(long ms) {
-		long currentTime = System.currentTimeMillis();
-		while (currentTime + ms > System.currentTimeMillis()) {
-		}
 	}
 }

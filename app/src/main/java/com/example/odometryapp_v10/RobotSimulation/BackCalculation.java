@@ -124,6 +124,23 @@ public class BackCalculation {
 		bR = bRPower;
 	}
 
+	public static void setLeftDrivetrainPower(double power) {
+		bL = power;
+		fL = power;
+	}
+
+	public static void setRightDrivetrainPower(double power) {
+		bR = power;
+		fR = power;
+	}
+
+	public static void setDrivetrainPower(double power) {
+		bL = power;
+		fL = power;
+		bR = power;
+		fR = power;
+	}
+
 	public static double negate(double value) {
 		return (value * -1);
 	}

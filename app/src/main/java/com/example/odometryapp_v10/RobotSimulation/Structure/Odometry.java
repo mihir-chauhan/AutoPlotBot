@@ -76,9 +76,9 @@ public class Odometry {
 				while (runThread) {
 					updatePosition();
 					updatedPosition = getCurrentPose();
-					RobotSim.setPosition(updatedPosition.x, updatedPosition.y);
-					RobotSim.setHeading(updatedPosition.heading);
+					RobotSim.setHeading(updatedPosition, (float) updatedPosition.heading);
 				}
+				backgroundPositionThread.interrupt();
 			}
 		});
 		backgroundPositionThread.setPriority(Thread.MAX_PRIORITY);
@@ -88,7 +88,6 @@ public class Odometry {
 
 	public void stopBackgroundPositionUpdates() {
 		runThread = false;
-		backgroundPositionThread.interrupt();
 	}
 
 	public void sleep(long ms) {

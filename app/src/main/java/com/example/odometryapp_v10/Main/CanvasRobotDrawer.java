@@ -13,6 +13,8 @@ import android.widget.ImageView;
 
 import com.example.odometryapp_v10.MainActivity;
 import com.example.odometryapp_v10.R;
+import com.example.odometryapp_v10.RobotSimulation.RobotSim;
+import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
 
 import java.util.ArrayList;
 
@@ -24,10 +26,11 @@ public class CanvasRobotDrawer {
     private Paint paint;
 
 
-    public CanvasRobotDrawer(Context context, View view) {
+    public CanvasRobotDrawer(Context context, View view, Activity activity) {
         this.context = context;
         this.view = view;
         canRunDrawingThread = true;
+        RobotSim robotSim = new RobotSim(context, view, new Pose(24, 48, Math.toRadians(90)), activity);
     }
 
     public void clearCanvas() {
@@ -69,17 +72,6 @@ public class CanvasRobotDrawer {
                 previousY = 584 - previousY;
                 canvas.drawLine((float) previousX, (float) previousY, (float) x, (float) y, paint);
             }
-
-//        if (functionCoordinates.size() >= 2) {
-//            for (int i = 0; i < ((functionCoordinates.size()) / 2); i++) {
-//                canvas.drawCircle((float)functionCoordinates.get(i).x, (float)functionCoordinates.get(i).y, 7, paint);
-//                if (functionCoordinates.size() > 2 && i > 0) {
-//                    canvas.drawLine((float)functionCoordinates.get(i - 1).x, (float)functionCoordinates.get(i - 1).y, (float)functionCoordinates.get(i).x, (float)functionCoordinates.get(i).x, paint);
-//                }
-//            }
-//        } else {
-//            canvas.drawCircle((float)functionCoordinates.get(0).x, (float)functionCoordinates.get(0).y, 7, paint);
-//        }
         }
         canvas.drawPath(new Path(), paint);
 

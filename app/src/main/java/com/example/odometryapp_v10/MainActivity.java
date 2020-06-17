@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
         buildRecyclerView();
 
-        drawer = new CanvasRobotDrawer(this, findViewById(android.R.id.content).getRootView());
+        drawer = new CanvasRobotDrawer(this, findViewById(android.R.id.content).getRootView(), MainActivity.this);
 
         com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
         addNewFunction.setOnClickListener(new View.OnClickListener() {

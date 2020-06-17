@@ -250,7 +250,9 @@ public class MecanumDrivetrain {
 				for (int i = 0; i < targetCoordinates.size(); i++) {
 					if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.strafe)) {
 						strafeToPosition(targetCoordinates.get(i).position, movementPower);
-					} else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.move)) {
+					} else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveForward)) {
+						rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.forward);
+					} else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveBackward)) {
 						rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.backward);
 					} else {
 						System.out.println("?");

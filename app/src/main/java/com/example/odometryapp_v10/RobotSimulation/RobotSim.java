@@ -46,47 +46,9 @@ public class RobotSim {
     private static Odometry odometry;
     public static Pose startingPosition;
 
-
     static Canvas canvas = new Canvas();
 
-//    public static void setPosition(double xPos, double yPos) {
-//        BitmapFactory.Options myOptions = new BitmapFactory.Options();
-//        myOptions.inDither = true;
-//        myOptions.inScaled = false;
-//        myOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;// important
-//        myOptions.inPurgeable = true;
-//        myOptions.inMutable = true;
-//        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.field_image2, myOptions);
-//
-//        final Bitmap workingBitmap = Bitmap.createBitmap(bitmap);
-//        final Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
-//        canvas = new Canvas(mutableBitmap);
-//
-//        Bitmap bmp = BitmapFactory.decodeResource(context.getResources(), R.drawable.robotimage, myOptions);
-//        Bitmap wrkBmp = Bitmap.createBitmap(bmp);
-//        final Bitmap mtbleBmp = wrkBmp.copy(Bitmap.Config.ARGB_8888, true);
-//
-//        double x = xPos * 584 / 144;
-//        double y = yPos * 584 / 144;
-//        y = (584 - 50) - y;
-//        x = x - 40;
-//        Matrix rotator = new Matrix();
-//
-//        rotator.postTranslate((float) x, (float) y);
-//
-//        canvas.drawBitmap(Bitmap.createScaledBitmap(mtbleBmp, 80, 80, false), rotator, null);
-//
-//        activity.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                final ImageView imageView = view.findViewById(R.id.fieldView);
-//                imageView.setAdjustViewBounds(true);
-//                imageView.setImageBitmap(mutableBitmap);
-//            }
-//        });
-//    }
-
-    public static void setHeading(Pose position, float heading) {
+    public static void setPosition(Pose position, float heading) {
         BitmapFactory.Options myOptions = new BitmapFactory.Options();
         myOptions.inDither = true;
         myOptions.inScaled = false;
@@ -108,7 +70,8 @@ public class RobotSim {
         y = (584) - y;
         Matrix rotator = new Matrix();
 
-        rotator.postRotate(heading, mtbleBmp.getWidth() / 2, mtbleBmp.getHeight() / 2);
+        float rad = -heading + (float) (Math.PI / 2);
+        rotator.postRotate((float) Math.toDegrees(rad), mtbleBmp.getWidth() / 2, mtbleBmp.getHeight() / 2);
         rotator.postTranslate((float) x, (float) y);
 
         canvas.drawBitmap(Bitmap.createScaledBitmap(mtbleBmp, 80, 80, false), rotator, null);
@@ -134,7 +97,7 @@ public class RobotSim {
 
         ArrayList<MovementPose> movementCoordinates = new ArrayList<>();
 
-        movementCoordinates.add(new MovementPose(new Pose(70, 70, Math.toRadians(90)), MovementPose.MovementType.strafe));
+        movementCoordinates.add(new MovementPose(new Pose(70, 70, Math.toRadians(180)), MovementPose.MovementType.moveBackward));
 
         MecanumDrivetrain.startBackgroundPositionUpdates(movementCoordinates, 0.1);
     }

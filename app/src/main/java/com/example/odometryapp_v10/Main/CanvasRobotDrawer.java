@@ -30,11 +30,7 @@ public class CanvasRobotDrawer {
         this.context = context;
         this.view = view;
         canRunDrawingThread = true;
-        RobotSim robotSim = new RobotSim(context, view, new Pose(24, 48, Math.toRadians(90)), activity);
-    }
-
-    public void clearCanvas() {
-//        canvas.
+        new RobotSim(context, view, new Pose(24, 48, Math.toRadians(90)), activity);
     }
 
 
@@ -55,20 +51,15 @@ public class CanvasRobotDrawer {
         final Bitmap mutableBitmap = workingBitmap.copy(Bitmap.Config.ARGB_8888, true);
         canvas = new Canvas(mutableBitmap);
 
-        System.out.println("C>S: " + coordinates.size());
-
         for (int i = 0; i < coordinates.size(); i++) {
             double x = coordinates.get(i).x * 584 / 144;
             double y = coordinates.get(i).y * 584 / 144;
-            System.out.println("X: " + x + "Y:" + (584 - y));
             y = 584 - y;
             canvas.drawCircle((float) x, (float) y, 7, paint);
 
             if (coordinates.size() > 1 && i >= 1) {
                 double previousX = coordinates.get(i - 1).x * 584 / 144;
                 double previousY = coordinates.get(i - 1).y * 584 / 144;
-                System.out.println("RPX: " + coordinates.get(i - 1).x + ", RPY: " + coordinates.get(i - 1).y);
-                System.out.println("PX: " + previousX + ", PY: " + (584 - previousY));
                 previousY = 584 - previousY;
                 canvas.drawLine((float) previousX, (float) previousY, (float) x, (float) y, paint);
             }

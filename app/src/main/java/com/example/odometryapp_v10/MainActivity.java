@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 doesHaveToCreateNewFile = true;
                 allCoordinates.clear();
                 drawer.drawPointAt(allCoordinates);
+                robotSimulatorMovementCoordinates.clear();
             }
         });
 
@@ -460,14 +461,14 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/";
                     listOfAllFunctionParameters.add(functionParameters);
                     addToRecyclerView(functionName, functionParameters);
-                    JSON.addFunctionFromProgramToFile(fileName, functionName, functionParameters, null);
+                    JSON.addFunctionFromProgramToFile(fileName, functionName, movementType, functionParameters, null);
                 } else {
                     listOfAllFunctionParameters.add(functionParameters);
                     addToRecyclerView(functionName, functionParameters);
                     if (currentFileName.contains("program")) {
-                        JSON.addFunctionFromProgramToFile(currentFileName, functionName, functionParameters, null);
+                        JSON.addFunctionFromProgramToFile(currentFileName, functionName, movementType, functionParameters, null);
                     } else {
-                        JSON.addFunctionFromProgramToFile(currentFileName, functionName, functionParameters, Environment.getExternalStorageDirectory() + "/Innov8rz/");
+                        JSON.addFunctionFromProgramToFile(currentFileName, functionName, movementType, functionParameters, Environment.getExternalStorageDirectory() + "/Innov8rz/");
                     }
                 }
                 if (isDrivetrainFunction) {

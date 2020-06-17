@@ -280,11 +280,14 @@ public class JSON {
     }
 
 
-    public static void addFunctionFromProgramToFile(String fileName, String functionName, ArrayList<FunctionReturnFormat> functionParameters, @Nullable String filePath){
+    public static void addFunctionFromProgramToFile(String fileName, String functionName, String movementType, ArrayList<FunctionReturnFormat> functionParameters, @Nullable String filePath){
         JSONObject jsonObject = new JSONObject();
 
         try {
             jsonObject.put("functionName", functionName);
+            if(movementType.equals("None")) {
+                jsonObject.put("movementType", movementType);
+            }
             JSONObject parametersObject = new JSONObject();
             for(int i = 0; i < functionParameters.size(); i++) {
                 parametersObject.put(functionParameters.get(i).parameterName, functionParameters.get(i).parameterValue);

@@ -66,14 +66,15 @@ public class RobotSim {
 
         double x = position.x * 584 / 144;
         double y = position.y * 584 / 144;
-        y = (584) - y;
+        y = (584 - 40) - y;
+        x = x - 40;
         Matrix rotator = new Matrix();
 
         float rad = -heading + (float) (Math.PI / 2);
         rotator.postRotate((float) Math.toDegrees(rad), mtbleBmp.getWidth() / 2, mtbleBmp.getHeight() / 2);
         rotator.postTranslate((float) x, (float) y);
 
-        canvas.drawBitmap(Bitmap.createScaledBitmap(mtbleBmp, 80, 80, false), rotator, null);
+        canvas.drawBitmap(Bitmap.createBitmap(mtbleBmp), rotator, null);
 
         activity.runOnUiThread(new Runnable() {
             @Override

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/originX"
+        android:textSize="20sp"
+        android:gravity="center_vertical"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="1sp"
+        android:autoSizeMaxTextSize="50sp"
+        android:autoSizeStepGranularity="1sp"
+        android:inputType="numberDecimal"
+        android:hint="X"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/originY"
+        android:textSize="20sp"
+        android:gravity="center_vertical"
+        android:layout_below="@id/originX"
+        android:layout_marginTop="16dp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="1sp"
+        android:autoSizeMaxTextSize="50sp"
+        android:autoSizeStepGranularity="1sp"
+        android:inputType="numberDecimal"
+        android:hint="Y"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/originHeading"
+        android:textSize="20sp"
+        android:gravity="center_vertical"
+        android:layout_below="@id/originY"
+        android:layout_marginTop="16dp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="1sp"
+        android:autoSizeMaxTextSize="50sp"
+        android:autoSizeStepGranularity="1sp"
+        android:inputType="numberDecimal"
+        android:hint="Heading"
+        />
+</RelativeLayout>

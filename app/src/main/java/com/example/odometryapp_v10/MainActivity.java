@@ -28,6 +28,7 @@ import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
 import com.example.odometryapp_v10.Dialogs.EditFunction;
 import com.example.odometryapp_v10.Dialogs.LoadFile;
+import com.example.odometryapp_v10.Dialogs.RobotOrigin;
 import com.example.odometryapp_v10.Dialogs.SaveFile;
 import com.example.odometryapp_v10.Main.CanvasRobotDrawer;
 import com.example.odometryapp_v10.Main.Coordinate;
@@ -56,7 +57,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener, SaveFile.saveProgramListener, LoadFile.loadProgramListener {
+public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener, SaveFile.saveProgramListener, LoadFile.loadProgramListener, RobotOrigin.robotOriginListener {
     com.github.sealstudios.fab.FloatingActionButton callFunction;
     com.github.sealstudios.fab.FloatingActionButton editFunction;
     com.github.sealstudios.fab.FloatingActionButton saveFunction;
@@ -74,12 +75,15 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     private ArrayList<MovementPose> robotSimulatorMovementCoordinates;
     RobotSim robotSim;
     boolean didSendRobotSimCommand = false;
+    private Pose robotOrigin = new Pose(0, 0, Math.toRadians(90));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+
+        Toast.makeText(this, "Set a robot origin. Default origin: (0, 0, 90)", Toast.LENGTH_SHORT).show();
 
         robotSimulatorMovementCoordinates = new ArrayList<>();
 
@@ -92,6 +96,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         simulate = findViewById(R.id.simulate);
 
         drawer = new CanvasRobotDrawer(this, findViewById(android.R.id.content).getRootView(), MainActivity.this);
+
+        allCoordinates.add(new Coordinate(robotOrigin.x, robotOrigin.y));
+        drawer.drawPointAt(allCoordinates);
 
         com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
         addNewFunction.setOnClickListener(new View.OnClickListener() {
@@ -160,6 +167,16 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 allCoordinates.clear();
                 drawer.drawPointAt(allCoordinates);
                 robotSimulatorMovementCoordinates.clear();
+            }
+        });
+
+        com.github.sealstudios.fab.FloatingActionButton setOrigin = findViewById(R.id.setOrigin);
+        setOrigin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RobotOrigin robotOrigin = new RobotOrigin();
+                robotOrigin.setCancelable(false);
+                robotOrigin.show(getSupportFragmentManager(), "robotOrigin");
             }
         });
 
@@ -354,50 +371,83 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if (JSON.doesFileExist("functions", Environment.getExternalStorageDirectory() + "/Documents/")) {
-                                try {
-                                    if (JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function").length() >= 1) {
-                                        callFunction.setEnabled(true);
-                                        editFunction.setEnabled(true);
-                                    } else {
+                            if(!didSendRobotSimCommand) {
+                                com.github.sealstudios.fab.FloatingActionButton robotOrigin = findViewById(R.id.setOrigin);
+                                com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
+                                com.github.sealstudios.fab.FloatingActionButton editFunction = findViewById(R.id.editFunction);
+                                com.github.sealstudios.fab.FloatingActionButton callFunction = findViewById(R.id.callFunction);
+                                com.github.sealstudios.fab.FloatingActionButton saveProgram = findViewById(R.id.saveFile);
+                                com.github.sealstudios.fab.FloatingActionButton loadProgram = findViewById(R.id.uploadFile);
+                                com.github.sealstudios.fab.FloatingActionButton newProgram = findViewById(R.id.newProgram);
+
+                                robotOrigin.setEnabled(!didSendRobotSimCommand);
+                                addNewFunction.setEnabled(!didSendRobotSimCommand);
+                                editFunction.setEnabled(!didSendRobotSimCommand);
+                                callFunction.setEnabled(!didSendRobotSimCommand);
+                                saveProgram.setEnabled(!didSendRobotSimCommand);
+                                loadProgram.setEnabled(!didSendRobotSimCommand);
+                                newProgram.setEnabled(!didSendRobotSimCommand);
+
+                                if (JSON.doesFileExist("functions", Environment.getExternalStorageDirectory() + "/Documents/")) {
+                                    try {
+                                        if (JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function").length() >= 1) {
+                                            callFunction.setEnabled(true);
+                                            editFunction.setEnabled(true);
+                                        } else {
+                                            callFunction.setEnabled(false);
+                                            editFunction.setEnabled(false);
+                                        }
+                                    } catch (Exception ignore) {
                                         callFunction.setEnabled(false);
                                         editFunction.setEnabled(false);
                                     }
-                                } catch (Exception ignore) {
+                                } else {
                                     callFunction.setEnabled(false);
                                     editFunction.setEnabled(false);
                                 }
-                            } else {
-                                callFunction.setEnabled(false);
-                                editFunction.setEnabled(false);
-                            }
-                            if (recyclerViewItemArrayList.size() >= 1) {
-                                saveFunction.setEnabled(true);
-                            } else {
-                                saveFunction.setEnabled(false);
-                            }
-
-                            File f = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/");
-
-                            FilenameFilter filter = new FilenameFilter() {
-                                @Override
-                                public boolean accept(File f, String name) {
-                                    return name.endsWith(".txt");
+                                if (recyclerViewItemArrayList.size() >= 1) {
+                                    saveFunction.setEnabled(true);
+                                } else {
+                                    saveFunction.setEnabled(false);
                                 }
-                            };
 
-                            if (f.list(filter).length >= 1) {
-                                loadFunction.setEnabled(true);
+                                File f = new File(Environment.getExternalStorageDirectory() + "/Innov8rz/");
+
+                                FilenameFilter filter = new FilenameFilter() {
+                                    @Override
+                                    public boolean accept(File f, String name) {
+                                        return name.endsWith(".txt");
+                                    }
+                                };
+
+                                if (f.list(filter).length >= 1) {
+                                    loadFunction.setEnabled(true);
+                                } else {
+                                    loadFunction.setEnabled(false);
+                                }
+
+
+                                if(!didSendRobotSimCommand) {
+                                    drawer.drawPointAt(allCoordinates);
+                                }
                             } else {
-                                loadFunction.setEnabled(false);
-                            }
+                                com.github.sealstudios.fab.FloatingActionButton robotOrigin = findViewById(R.id.setOrigin);
+                                com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
+                                com.github.sealstudios.fab.FloatingActionButton editFunction = findViewById(R.id.editFunction);
+                                com.github.sealstudios.fab.FloatingActionButton callFunction = findViewById(R.id.callFunction);
+                                com.github.sealstudios.fab.FloatingActionButton saveProgram = findViewById(R.id.saveFile);
+                                com.github.sealstudios.fab.FloatingActionButton loadProgram = findViewById(R.id.uploadFile);
+                                com.github.sealstudios.fab.FloatingActionButton newProgram = findViewById(R.id.newProgram);
 
+                                robotOrigin.setEnabled(!didSendRobotSimCommand);
+                                addNewFunction.setEnabled(!didSendRobotSimCommand);
+                                editFunction.setEnabled(!didSendRobotSimCommand);
+                                callFunction.setEnabled(!didSendRobotSimCommand);
+                                saveProgram.setEnabled(!didSendRobotSimCommand);
+                                loadProgram.setEnabled(!didSendRobotSimCommand);
+                                newProgram.setEnabled(!didSendRobotSimCommand);
+                            }
                             MainActivity.super.invalidateOptionsMenu();
-
-                            if(!didSendRobotSimCommand) {
-                                drawer.drawPointAt(allCoordinates);
-                            }
-
                         }
                     });
                     try {
@@ -433,7 +483,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.simulate:
-                robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), new Pose(allCoordinates.get(0).x, allCoordinates.get(0).y, Math.toRadians(135)), MainActivity.this);
+                robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), robotOrigin, MainActivity.this);
                 robotSim.startMovement(robotSimulatorMovementCoordinates);
                 didSendRobotSimCommand = true;
                 return true;
@@ -462,6 +512,14 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     /** Callback functions from Dialogs **/
+
+    @Override
+    public void setRobotOrigin(Pose robotOrigin) {
+        this.robotOrigin = robotOrigin;
+        allCoordinates.remove(0);
+        allCoordinates.add(0, new Coordinate(robotOrigin.x, robotOrigin.y));
+        drawer.drawPointAt(allCoordinates);
+    }
 
     @Override
     public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType, String movementType) {
@@ -499,6 +557,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             if (!isEditing) {
                 if (doesHaveToCreateNewFile) {
                     allCoordinates.clear();
+                    allCoordinates.add(new Coordinate(robotOrigin.x, robotOrigin.y));
                     SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
                     Date date = new Date();
                     fileName += "-" + formatter.format(date);

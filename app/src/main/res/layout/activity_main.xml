@@ -28,22 +28,23 @@
                 app:menu_colorRipple="@color/colorAccent">
 
                 <com.github.sealstudios.fab.FloatingActionButton
-                    android:id="@+id/addNewFunction"
+                    android:id="@+id/setOrigin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:fab_size="mini"
-                    android:src="@drawable/ic_code_black_24dp"
+                    android:src="@drawable/ic_gps_fixed_black_24dp"
+                    app:fab_colorDisabled="#404040"
                     app:fab_colorNormal="@color/colorAccent"
                     app:fab_colorRipple="@color/colorAccent"
                     app:fab_colorPressed="@android:color/white"/>
 
                 <com.github.sealstudios.fab.FloatingActionButton
-                    android:id="@+id/callFunction"
+                    android:id="@+id/addNewFunction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:fab_size="mini"
+                    android:src="@drawable/ic_code_black_24dp"
                     app:fab_colorDisabled="#404040"
-                    android:src="@drawable/ic_playlist_add_black_24dp"
                     app:fab_colorNormal="@color/colorAccent"
                     app:fab_colorRipple="@color/colorAccent"
                     app:fab_colorPressed="@android:color/white"/>
@@ -60,12 +61,12 @@
                     app:fab_colorPressed="@android:color/white"/>
 
                 <com.github.sealstudios.fab.FloatingActionButton
-                    android:id="@+id/uploadFile"
+                    android:id="@+id/callFunction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:fab_size="mini"
                     app:fab_colorDisabled="#404040"
-                    android:src="@drawable/ic_file_upload_black_24dp"
+                    android:src="@drawable/ic_playlist_add_black_24dp"
                     app:fab_colorNormal="@color/colorAccent"
                     app:fab_colorRipple="@color/colorAccent"
                     app:fab_colorPressed="@android:color/white"/>
@@ -77,6 +78,17 @@
                     app:fab_size="mini"
                     android:src="@drawable/ic_save_black_24dp"
                     app:fab_colorDisabled="#404040"
+                    app:fab_colorNormal="@color/colorAccent"
+                    app:fab_colorRipple="@color/colorAccent"
+                    app:fab_colorPressed="@android:color/white"/>
+
+                <com.github.sealstudios.fab.FloatingActionButton
+                    android:id="@+id/uploadFile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:fab_size="mini"
+                    app:fab_colorDisabled="#404040"
+                    android:src="@drawable/ic_file_upload_black_24dp"
                     app:fab_colorNormal="@color/colorAccent"
                     app:fab_colorRipple="@color/colorAccent"
                     app:fab_colorPressed="@android:color/white"/>

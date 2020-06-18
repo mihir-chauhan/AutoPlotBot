@@ -87,8 +87,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
         robotSimulatorMovementCoordinates = new ArrayList<>();
 
-        robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), new Pose(10, 10, Math.toRadians(90)), MainActivity.this);
-
         checkForWritePermission();
 
         buildRecyclerView();
@@ -494,7 +492,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.simulate:
-                robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), robotOrigin, MainActivity.this);
+                robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), robotOrigin, MainActivity.this, allCoordinates);
                 robotSim.startMovement(robotSimulatorMovementCoordinates);
                 didSendRobotSimCommand = true;
                 return true;

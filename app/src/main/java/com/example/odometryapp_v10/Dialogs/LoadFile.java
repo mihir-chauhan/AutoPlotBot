@@ -15,6 +15,7 @@ import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+import com.example.odometryapp_v10.Main.Coordinate;
 import com.example.odometryapp_v10.Main.FunctionReturnFormat;
 import com.example.odometryapp_v10.Main.JSON;
 import com.example.odometryapp_v10.Main.LoadFileReturnFormat;
@@ -88,37 +89,41 @@ public class LoadFile extends AppCompatDialogFragment {
                         fileName = allProgramNames.get(position - 1);
                         JSONArray jsonArray = jsonObject.getJSONArray("program");
                         for (int i = 0; i < jsonArray.length(); i++) {
-                            String functionName = jsonArray.getJSONObject(i).getString("functionName");
-                            ArrayList<FunctionReturnFormat> functionReturnFormatArrayList = new ArrayList<>();
-                            JSONArray functionsJSONArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
-                            int functionPosition = JSON.returnFunctionPositionFromJSONArray(functionsJSONArray, functionName);
-                            ArrayList<FunctionReturnFormat> functionFileParameters = new ArrayList<>();
-                            boolean isDrivetrain = functionsJSONArray.getJSONObject(functionPosition).getString("functionType").equals("Drivetrain");
-                            Iterator<String> keys = functionsJSONArray.getJSONObject(functionPosition).getJSONObject("parameters").keys();
-                            while (keys.hasNext()) {
-                                String key = keys.next();
-                                try {
-                                    functionFileParameters.add(new FunctionReturnFormat(key, functionsJSONArray.getJSONObject(functionPosition).getJSONObject("parameters").get(key).toString()));
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                            if(jsonArray.getJSONObject(i).getJSONObject("parameters").length() >= 1) {
-                                for (int x = 0; x < jsonArray.getJSONObject(i).getJSONObject("parameters").length(); x++) {
-                                    functionReturnFormatArrayList.add(new FunctionReturnFormat(functionFileParameters.get(x).parameterName, jsonArray.getJSONObject(i).getJSONObject("parameters").get(functionFileParameters.get(x).parameterName)));
-
-                                }
-                            }
-
-                            String movementType = null;
-
                             try {
-                                movementType = jsonArray.getJSONObject(i).getString("movementType");
-                            } catch (Exception ignore) {
-                                movementType = "None";
-                            }
+                                String functionName = jsonArray.getJSONObject(i).getString("functionName");
+                                ArrayList<FunctionReturnFormat> functionReturnFormatArrayList = new ArrayList<>();
+                                JSONArray functionsJSONArray = JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function");
+                                int functionPosition = JSON.returnFunctionPositionFromJSONArray(functionsJSONArray, functionName);
+                                ArrayList<FunctionReturnFormat> functionFileParameters = new ArrayList<>();
+                                boolean isDrivetrain = functionsJSONArray.getJSONObject(functionPosition).getString("functionType").equals("Drivetrain");
+                                Iterator<String> keys = functionsJSONArray.getJSONObject(functionPosition).getJSONObject("parameters").keys();
+                                while (keys.hasNext()) {
+                                    String key = keys.next();
+                                    try {
+                                        functionFileParameters.add(new FunctionReturnFormat(key, functionsJSONArray.getJSONObject(functionPosition).getJSONObject("parameters").get(key).toString()));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                if(jsonArray.getJSONObject(i).getJSONObject("parameters").length() >= 1) {
+                                    for (int x = 0; x < jsonArray.getJSONObject(i).getJSONObject("parameters").length(); x++) {
+                                        functionReturnFormatArrayList.add(new FunctionReturnFormat(functionFileParameters.get(x).parameterName, jsonArray.getJSONObject(i).getJSONObject("parameters").get(functionFileParameters.get(x).parameterName)));
 
-                            returnFormatArrayList.add(new LoadFileReturnFormat(functionName, movementType, functionReturnFormatArrayList, isDrivetrain));
+                                    }
+                                }
+
+                                String movementType = null;
+
+                                try {
+                                    movementType = jsonArray.getJSONObject(i).getString("movementType");
+                                } catch (Exception ignore) {
+                                    movementType = "None";
+                                }
+
+                                returnFormatArrayList.add(new LoadFileReturnFormat(functionName, movementType, functionReturnFormatArrayList, isDrivetrain));
+                            } catch (Exception ignore) {
+
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -147,6 +152,6 @@ public class LoadFile extends AppCompatDialogFragment {
     }
 
     public interface loadProgramListener {
-        void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> filePrograms);
+        void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> filePrograms, Coordinate robotOrigin);
     }
 }

@@ -684,7 +684,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     @Override
-    public void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> fileFunctions) {
+    public void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> fileFunctions, Coordinate robotOrigin) {
         allCoordinates.clear();
         robotSimulatorMovementCoordinates.clear();
         recyclerViewItemArrayList.clear();

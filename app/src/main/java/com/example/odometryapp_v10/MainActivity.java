@@ -250,6 +250,12 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                if(!didSendRobotSimCommand) {
+                    recyclerViewAdapter.notifyDataSetChanged();
+                    Toast.makeText(MainActivity.this, "Unable to reorder because simulation is currently running", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
                 int fromPosition = viewHolder.getAdapterPosition();
                 int toPosition = target.getAdapterPosition();
 
@@ -284,6 +290,11 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
             @Override
             public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
+                if(!didSendRobotSimCommand) {
+                    recyclerViewAdapter.notifyDataSetChanged();
+                    Toast.makeText(MainActivity.this, "Unable to reorder because simulation is currently running", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 final int deletedRowPosition = viewHolder.getAdapterPosition();
                 final RecyclerViewItem currentItem = recyclerViewItemArrayList.get(deletedRowPosition);
                 MovementPose currentMP = null;

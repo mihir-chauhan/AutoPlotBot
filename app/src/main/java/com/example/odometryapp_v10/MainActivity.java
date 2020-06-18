@@ -236,11 +236,18 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 int fromPosition = viewHolder.getAdapterPosition();
                 int toPosition = target.getAdapterPosition();
 
-                Collections.swap(allCoordinates, fromPosition, toPosition);
-                drawer.drawPointAt(allCoordinates);
+
                 if(recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("x") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("x")) {
                     if(recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("y") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("y")) {
-                        Collections.swap(robotSimulatorMovementCoordinates, fromPosition, toPosition);
+                        int robotPointsOffSet = 0;
+                        for(int i = 0; i < fromPosition; i++) {
+                            if(!recyclerViewItemArrayList.get(i).getFunctionParameters().contains("x") && !recyclerViewItemArrayList.get(i).getFunctionParameters().contains("y")) {
+                                robotPointsOffSet++;
+                            }
+                        }
+                        Collections.swap(allCoordinates, fromPosition - robotPointsOffSet, toPosition - robotPointsOffSet);
+                        drawer.drawPointAt(allCoordinates);
+                        Collections.swap(robotSimulatorMovementCoordinates, fromPosition - robotPointsOffSet, toPosition - robotPointsOffSet);
                     }
                 }
 

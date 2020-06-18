@@ -13,10 +13,15 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.odometryapp_v10.Dialogs.AddNewFunction;
@@ -56,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     com.github.sealstudios.fab.FloatingActionButton editFunction;
     com.github.sealstudios.fab.FloatingActionButton saveFunction;
     com.github.sealstudios.fab.FloatingActionButton loadFunction;
-    com.github.sealstudios.fab.FloatingActionButton playProgram;
+    TextView simulate;
 
     private RecyclerView recyclerView;
     private RecyclerViewAdapter recyclerViewAdapter;
@@ -78,12 +83,13 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
         robotSimulatorMovementCoordinates = new ArrayList<>();
 
-        final View view = findViewById(android.R.id.content).getRootView();
-        robotSim = new RobotSim(getApplicationContext(), view, new Pose(10, 10, Math.toRadians(90)), MainActivity.this);
+        robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), new Pose(10, 10, Math.toRadians(90)), MainActivity.this);
 
         checkForWritePermission();
 
         buildRecyclerView();
+
+        simulate = findViewById(R.id.simulate);
 
         drawer = new CanvasRobotDrawer(this, findViewById(android.R.id.content).getRootView(), MainActivity.this);
 
@@ -157,16 +163,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             }
         });
 
-        playProgram = findViewById(R.id.playProgram);
-        playProgram.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                robotSim = new RobotSim(getApplicationContext(), view, new Pose(10, 10, Math.toRadians(90)), MainActivity.this);
-                robotSim.startMovement(robotSimulatorMovementCoordinates);
-                didSendRobotSimCommand = true;
-            }
-        });
-
         canRunFABThread = true;
         enableOrDisableFAButtons();
     }
@@ -201,6 +197,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         }
 
     }
+
+    /** Main Activity Layout Creation **/
 
     private void buildRecyclerView() {
         recyclerView = findViewById(R.id.programFunctionsRecyclerView);
@@ -238,6 +236,14 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 int fromPosition = viewHolder.getAdapterPosition();
                 int toPosition = target.getAdapterPosition();
 
+                Collections.swap(allCoordinates, fromPosition, toPosition);
+                drawer.drawPointAt(allCoordinates);
+                if(recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("x") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("x")) {
+                    if(recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("y") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("y")) {
+                        Collections.swap(robotSimulatorMovementCoordinates, fromPosition, toPosition);
+                    }
+                }
+
                 Collections.swap(recyclerViewItemArrayList, fromPosition, toPosition);
                 recyclerViewAdapter.notifyItemMoved(fromPosition, toPosition);
 
@@ -246,9 +252,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 } else {
                     JSON.reorderFunctionsInProgram(fromPosition, toPosition, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/");
                 }
-
-                Collections.swap(allCoordinates, fromPosition, toPosition);
-                drawer.drawPointAt(allCoordinates);
 
                 //TODO: add swapping for robotSimulatorMovementCoordinates if the two swapped are movementtypes
 
@@ -296,13 +299,13 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                         });
                 snackbar.show();
 
-                drawer.drawPointAt(allCoordinates);
                 if (recyclerViewItemArrayList.get(deletedRowPosition).getFunctionParameters().contains("x:")) {
                     if (recyclerViewItemArrayList.get(deletedRowPosition).getFunctionParameters().contains("y:")) {
                         robotSimulatorMovementCoordinates.remove(deletedRowPosition);
                         allCoordinates.remove(deletedRowPosition);
                     }
                 }
+                drawer.drawPointAt(allCoordinates);
                 recyclerViewItemArrayList.remove(deletedRowPosition);
                 recyclerViewAdapter.notifyDataSetChanged();
                 if (jsonArray != null) {
@@ -382,18 +385,12 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                                 loadFunction.setEnabled(false);
                             }
 
-                            if (robotSimulatorMovementCoordinates.size() >= 1) {
-                                playProgram.setEnabled(true);
-                            } else {
-                                playProgram.setEnabled(false);
+                            MainActivity.super.invalidateOptionsMenu();
+
+                            if(!didSendRobotSimCommand) {
+                                drawer.drawPointAt(allCoordinates);
                             }
 
-                            if(Odometry.runThread && didSendRobotSimCommand) {
-                                playProgram.setEnabled(false);
-                            } else {
-                                didSendRobotSimCommand = false;
-                                playProgram.setEnabled(true);
-                            }
                         }
                     });
                     try {
@@ -415,6 +412,49 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         fabuttonThread.interrupt();
         super.onDestroy();
     }
+
+    /** Menu Item Creation and OnClickListeners **/
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.simulate:
+                robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), new Pose(10, 10, Math.toRadians(90)), MainActivity.this);
+                robotSim.startMovement(robotSimulatorMovementCoordinates);
+                didSendRobotSimCommand = true;
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (robotSimulatorMovementCoordinates.size() >= 1) {
+            if(Odometry.runThread && didSendRobotSimCommand) {
+                return false;
+            } else {
+                didSendRobotSimCommand = false;
+                return true;
+            }
+        } else {
+            return false;
+        }
+
+    }
+
+    @Override
+    public void invalidateOptionsMenu() {
+        super.invalidateOptionsMenu();
+    }
+
+    /** Callback functions from Dialogs **/
 
     @Override
     public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType, String movementType) {
@@ -597,7 +637,15 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     }
                     allCoordinates.add(new Coordinate(x, y));
                     drawer.drawPointAt(allCoordinates);
-                    robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.moveForward));
+                    if(!fileFunctions.get(i).movementType.equals("None")) {
+                        if(fileFunctions.get(i).movementType.equals("Strafe")) {
+                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.strafe));
+                        } else if(fileFunctions.get(i).movementType.equals("TankForward")) {
+                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.moveForward));
+                        } else if(fileFunctions.get(i).movementType.equals("TankBackward")) {
+                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.moveBackward));
+                        }
+                    }
                 }
             }
         } else {

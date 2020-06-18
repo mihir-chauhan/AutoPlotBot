@@ -110,7 +110,15 @@ public class LoadFile extends AppCompatDialogFragment {
                                 }
                             }
 
-                            returnFormatArrayList.add(new LoadFileReturnFormat(functionName, functionReturnFormatArrayList, isDrivetrain));
+                            String movementType = null;
+
+                            try {
+                                movementType = jsonArray.getJSONObject(i).getString("movementType");
+                            } catch (Exception ignore) {
+                                movementType = "None";
+                            }
+
+                            returnFormatArrayList.add(new LoadFileReturnFormat(functionName, movementType, functionReturnFormatArrayList, isDrivetrain));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();

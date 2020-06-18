@@ -82,7 +82,6 @@ public class MecanumDrivetrain {
         System.out.println("Angle to travel to: " + "(" + targetPose.x + ", " + targetPose.y + ")" + " : " + angleToTravel);
 		turnToHeading(angleToTravel, movementPower);
         tankToPosition(targetPose, movementPower, direction);
-		turnToHeading(angleToTravel, movementPower);
         BackCalculation.setFrontLeftPower(0);
         BackCalculation.setFrontRightPower(0);
         BackCalculation.setBackLeftPower(0);

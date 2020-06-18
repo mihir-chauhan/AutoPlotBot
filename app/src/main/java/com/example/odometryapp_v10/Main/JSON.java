@@ -285,7 +285,7 @@ public class JSON {
 
         try {
             jsonObject.put("functionName", functionName);
-            if(movementType.equals("None")) {
+            if(!movementType.equals("None")) {
                 jsonObject.put("movementType", movementType);
             }
             JSONObject parametersObject = new JSONObject();

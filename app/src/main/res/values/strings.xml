@@ -19,6 +19,6 @@
         <item>Tank Forward</item>
         <item>Tank Backward</item>
         <item>Strafe</item>
-<!--        <item>Pure Pursuit</item>-->
+        <item>Pure Pursuit</item>
     </string-array>
 </resources>

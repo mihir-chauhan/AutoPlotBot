@@ -6,7 +6,7 @@ import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
 public class MovementPose {
 
 	public enum MovementType {
-		moveForward, moveBackward, strafe
+		moveForward, moveBackward, strafe, purePursuit
 	}
 
 	public Pose position;

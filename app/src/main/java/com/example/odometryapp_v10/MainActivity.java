@@ -606,6 +606,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                         robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveForward));
                     } else if (movementType.equals("TankBackward")) {
                         robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveBackward));
+                    } else if (movementType.equals("PurePursuit")) {
+                        robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.purePursuit));
                     }
                     allCoordinates.add(new Coordinate(x, y));
                     drawer.drawPointAt(allCoordinates);
@@ -710,6 +712,8 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.moveForward));
                         } else if(fileFunctions.get(i).movementType.equals("TankBackward")) {
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.moveBackward));
+                        } else if (fileFunctions.get(i).movementType.equals("PurePursuit")) {
+                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveBackward));
                         }
                     }
                 }

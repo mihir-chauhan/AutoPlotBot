@@ -208,6 +208,8 @@ public class MecanumDrivetrain {
                         rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.forward);
                     } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveBackward)) {
                         rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.backward);
+                    } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.purePursuit)) {
+                        rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.backward);
                     } else {
                         System.out.println("?");
                     }

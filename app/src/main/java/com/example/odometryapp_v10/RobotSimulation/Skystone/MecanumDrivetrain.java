@@ -4,7 +4,9 @@ import com.example.odometryapp_v10.RobotSimulation.BackCalculation;
 import com.example.odometryapp_v10.RobotSimulation.MovementPose;
 import com.example.odometryapp_v10.RobotSimulation.RobotSim;
 import com.example.odometryapp_v10.RobotSimulation.Structure.Odometry;
+import com.example.odometryapp_v10.RobotSimulation.Structure.Path;
 import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
+import com.example.odometryapp_v10.RobotSimulation.Structure.PurePursuitController;
 
 import java.util.ArrayList;
 
@@ -80,7 +82,7 @@ public class MecanumDrivetrain {
     public static void rampTankToPosition(Pose targetPose, double movementPower, TankDirection direction) {
         double angleToTravel = odometry.angleToTravel(targetPose, direction);
         System.out.println("Angle to travel to: " + "(" + targetPose.x + ", " + targetPose.y + ")" + " : " + angleToTravel);
-		turnToHeading(angleToTravel, movementPower);
+        turnToHeading(angleToTravel, movementPower);
         tankToPosition(targetPose, movementPower, direction);
         BackCalculation.setFrontLeftPower(0);
         BackCalculation.setFrontRightPower(0);
@@ -150,7 +152,7 @@ public class MecanumDrivetrain {
             error = desiredHeading - currentPosition.heading;
             gain = Math.atan2(Math.sin(error), Math.cos(error)) * odometryGainMultiplier;
 
-            if(Math.abs(gain) < 0.01) {
+            if (Math.abs(gain) < 0.01) {
                 gain = 0;
             }
             BackCalculation.setLeftDrivetrainPower(checkPower(powerToMove - gain, 0.6));
@@ -196,22 +198,62 @@ public class MecanumDrivetrain {
         }
     }
 
-    public static void startBackgroundPositionUpdates(final ArrayList<MovementPose> targetCoordinates, final double movementPower) {
+    public static void startBackgroundPositionUpdates(final ArrayList<MovementPose> targetCoordinates, final double movementPower, final Pose startingPosition) {
         mecanumThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 System.out.println("Started Movement.");
-                for (int i = 0; i < targetCoordinates.size(); i++) {
-                    if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.strafe)) {
-                        strafeToPosition(targetCoordinates.get(i).position, movementPower);
-                    } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveForward)) {
-                        rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.forward);
-                    } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveBackward)) {
-                        rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.backward);
-                    } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.purePursuit)) {
-                        rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.backward);
-                    } else {
-                        System.out.println("?");
+                int numberOfPurePursuitPositions = 0;
+                ArrayList<Pose> positions = new ArrayList<>();
+                for (int i = 0; i < targetCoordinates.size() + 1; i++) {
+                    try {
+                        if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.strafe)) {
+                            System.out.println("S");
+                            if (numberOfPurePursuitPositions >= 1) {
+                                positions.add(0, startingPosition);
+                                positions.add(positions.size() - 1, positions.get(positions.size() - 1));
+                                executePath(new Path(positions, 0.1));
+                            }
+                            numberOfPurePursuitPositions = 0;
+                            positions.clear();
+                            strafeToPosition(targetCoordinates.get(i).position, movementPower);
+                        } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveForward)) {
+                            System.out.println("MF");
+                            if (numberOfPurePursuitPositions >= 1) {
+                                positions.add(0, startingPosition);
+                                positions.add(positions.size() - 1, positions.get(positions.size() - 1));
+                                executePath(new Path(positions, 0.1));
+                            }
+                            numberOfPurePursuitPositions = 0;
+                            positions.clear();
+
+                            rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.forward);
+                        } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveBackward)) {
+                            System.out.println("MB");
+                            if (numberOfPurePursuitPositions >= 1) {
+                                positions.add(0, startingPosition);
+                                positions.add(positions.size() - 1, positions.get(positions.size() - 1));
+                                executePath(new Path(positions, 0.1));
+                            }
+                            numberOfPurePursuitPositions = 0;
+                            positions.clear();
+
+                            rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.backward);
+                        } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.purePursuit)) {
+                            System.out.println("PP");
+                            numberOfPurePursuitPositions++;
+                            positions.add(targetCoordinates.get(i).position);
+                        } else {
+                            System.out.println("?");
+                        }
+                    } catch (Exception ignore) {
+                        if (numberOfPurePursuitPositions >= 1) {
+                            if (numberOfPurePursuitPositions >= 1) {
+                                positions.add(0, startingPosition);
+                                positions.add(positions.size() - 1, positions.get(positions.size() - 1));
+                                executePath(new Path(positions, 0.1));
+                            }
+                        }
                     }
                 }
                 System.out.println("Done Moving.");
@@ -285,7 +327,7 @@ public class MecanumDrivetrain {
             powerToMove *= -1;
         }
         double error = desiredHeading - currAngle;
-        double gain = Math.atan2(Math.sin(error), Math.cos(error)) * odometryGainMultiplier;
+        double gain = Math.atan2(Math.sin(error), Math.cos(error)) * 1;
         BackCalculation.setFrontLeftPower(checkPower(powerToMove - gain, 0.6));
         BackCalculation.setFrontRightPower(checkPower(powerToMove + gain, 0.6));
         BackCalculation.setBackLeftPower(checkPower(powerToMove - gain, 0.6));

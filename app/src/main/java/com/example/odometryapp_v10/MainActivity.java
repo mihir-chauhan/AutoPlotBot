@@ -426,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.simulate:
-                robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), new Pose(10, 10, Math.toRadians(90)), MainActivity.this);
+                robotSim = new RobotSim(getApplicationContext(), findViewById(android.R.id.content).getRootView(), new Pose(allCoordinates.get(0).x, allCoordinates.get(0).y, Math.toRadians(135)), MainActivity.this);
                 robotSim.startMovement(robotSimulatorMovementCoordinates);
                 didSendRobotSimCommand = true;
                 return true;

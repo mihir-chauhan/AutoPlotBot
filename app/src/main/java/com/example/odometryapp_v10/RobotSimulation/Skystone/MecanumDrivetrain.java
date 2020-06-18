@@ -210,7 +210,7 @@ public class MecanumDrivetrain {
                         if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.strafe)) {
                             System.out.println("S");
                             if (numberOfPurePursuitPositions >= 1) {
-                                positions.add(0, startingPosition);
+                                positions.add(0, odometry.getCurrentPose());
                                 positions.add(positions.size() - 1, positions.get(positions.size() - 1));
                                 executePath(new Path(positions, 0.1));
                             }
@@ -220,7 +220,7 @@ public class MecanumDrivetrain {
                         } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveForward)) {
                             System.out.println("MF");
                             if (numberOfPurePursuitPositions >= 1) {
-                                positions.add(0, startingPosition);
+                                positions.add(0, odometry.getCurrentPose());
                                 positions.add(positions.size() - 1, positions.get(positions.size() - 1));
                                 executePath(new Path(positions, 0.1));
                             }
@@ -231,7 +231,7 @@ public class MecanumDrivetrain {
                         } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.moveBackward)) {
                             System.out.println("MB");
                             if (numberOfPurePursuitPositions >= 1) {
-                                positions.add(0, startingPosition);
+                                positions.add(0, odometry.getCurrentPose());
                                 positions.add(positions.size() - 1, positions.get(positions.size() - 1));
                                 executePath(new Path(positions, 0.1));
                             }
@@ -249,7 +249,7 @@ public class MecanumDrivetrain {
                     } catch (Exception ignore) {
                         if (numberOfPurePursuitPositions >= 1) {
                             if (numberOfPurePursuitPositions >= 1) {
-                                positions.add(0, startingPosition);
+                                positions.add(0, odometry.getCurrentPose());
                                 positions.add(positions.size() - 1, positions.get(positions.size() - 1));
                                 executePath(new Path(positions, 0.1));
                             }

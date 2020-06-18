@@ -688,6 +688,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     @Override
     public void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> fileFunctions) {
         allCoordinates.clear();
+        robotSimulatorMovementCoordinates.clear();
         recyclerViewItemArrayList.clear();
         recyclerViewAdapter.notifyDataSetChanged();
         isEditingLoadedFile = true;
@@ -698,7 +699,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             for (int i = 0; i < fileFunctions.size(); i++) {
                 addToRecyclerView(fileFunctions.get(i).functionName, fileFunctions.get(i).parameters);
                 if (fileFunctions.get(i).isDrivetrain) {
-                    double x = 0, y = 0;
+                    double x = 0, y = 0, heading = 0;
                     for (int a = 0; a < fileFunctions.get(i).parameters.size(); a++) {
                         if (fileFunctions.get(i).parameters.get(a).parameterName.equals("x")) {
                             if (fileFunctions.get(i).parameters.get(a).parameterValue instanceof Integer) {
@@ -712,19 +713,25 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                             } else {
                                 y = (double) fileFunctions.get(i).parameters.get(a).parameterValue;
                             }
+                        } else if (fileFunctions.get(i).parameters.get(a).parameterName.equals("heading")) {
+                            if (fileFunctions.get(i).parameters.get(a).parameterValue instanceof Integer) {
+                                heading = (double) ((Integer) fileFunctions.get(i).parameters.get(a).parameterValue).intValue();
+                            } else {
+                                heading = (double) fileFunctions.get(i).parameters.get(a).parameterValue;
+                            }
                         }
                     }
                     allCoordinates.add(new Coordinate(x, y));
                     drawer.drawPointAt(allCoordinates);
                     if(!fileFunctions.get(i).movementType.equals("None")) {
                         if(fileFunctions.get(i).movementType.equals("Strafe")) {
-                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.strafe));
+                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(heading)), MovementPose.MovementType.strafe));
                         } else if(fileFunctions.get(i).movementType.equals("TankForward")) {
-                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.moveForward));
+                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveForward));
                         } else if(fileFunctions.get(i).movementType.equals("TankBackward")) {
-                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(270)), MovementPose.MovementType.moveBackward));
-                        } else if (fileFunctions.get(i).movementType.equals("PurePursuit")) {
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveBackward));
+                        } else if (fileFunctions.get(i).movementType.equals("PurePursuit")) {
+                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.purePursuit));
                         }
                     }
                 }

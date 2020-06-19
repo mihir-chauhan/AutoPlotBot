@@ -43,8 +43,8 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     static Spinner functionSelectorSpinner;
     ArrayList<String> allFunctionNames = new ArrayList<>();
     CustomListViewAdapter adapter = new CustomListViewAdapter();
-    public static boolean canSetSelectionOfFunctionSelector = false;
-    public static boolean isEditingFunction;
+    public boolean canSetSelectionOfFunctionSelector = false;
+    public static boolean isEditingFunction = false;
     private MovementType movementType;
     private enum ParameterTypes {
         String, Integer, Double, Boolean
@@ -56,7 +56,6 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
-        isEditingFunction = false;
         canSetSelectionOfFunctionSelector = false;
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         final LayoutInflater inflater = getActivity().getLayoutInflater();
@@ -66,6 +65,8 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         listView.setDivider(null);
         listView.setDividerHeight(0);
         initializeDialogComponents();
+
+        canSetSelectionOfFunctionSelector = true;
 
         builder.setView(view).setTitle("Call Function").setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
@@ -99,7 +100,6 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                 listener.callFunction(selectedFunctionName, parametersArray, isSelectedFunctionADrivetrainFunction, isEditingFunction, positionToEDIT, movementType.toString());
             }
         });
-        canSetSelectionOfFunctionSelector = true;
         return builder.create();
     }
 
@@ -135,10 +135,10 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
         functionSelectorSpinner.setOnItemSelectedListener(this);
     }
 
-    private static ArrayList<ArrayList<Object>> parametersIF_EDITING = new ArrayList<>();
+    private static ArrayList<FunctionReturnFormat> parametersIF_EDITING = new ArrayList<>();
     private static int positionToEDIT;
 
-    public static void setUpFunctionEditing(int editingPosition, ArrayList<ArrayList<Object>> parameters) {
+    public static void setUpFunctionEditing(int editingPosition, ArrayList<FunctionReturnFormat> parameters) {
         isEditingFunction = true;
         positionToEDIT = editingPosition;
         parametersIF_EDITING = parameters;
@@ -289,14 +289,14 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
             }
 
             if (isEditingFunction) {
-                if (parametersIF_EDITING.get(position).get(1).toString().equals("true") || parametersIF_EDITING.get(position).get(1).toString().equals("false")) {
-                    if (parametersIF_EDITING.get(position).get(1).toString().equals("true")) {
+                if (parametersIF_EDITING.get(position).parameterValue.toString().equals("true") || parametersIF_EDITING.get(position).parameterValue.toString().equals("false")) {
+                    if (parametersIF_EDITING.get(position).parameterValue.toString().equals("true")) {
                         holder.booleanSwitch.setChecked(true);
                     } else {
                         holder.booleanSwitch.setChecked(false);
                     }
                 } else {
-                    holder.editText.setText(parametersIF_EDITING.get(position).get(1).toString());
+                    holder.editText.setText(parametersIF_EDITING.get(position).parameterValue.toString());
                 }
             }
 

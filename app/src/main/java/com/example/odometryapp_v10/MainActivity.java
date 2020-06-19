@@ -220,7 +220,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     }
 
-    /** Main Activity Layout Creation **/
+    /**
+     * Main Activity Layout Creation
+     **/
 
     private void buildRecyclerView() {
         recyclerView = findViewById(R.id.programFunctionsRecyclerView);
@@ -232,30 +234,35 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         recyclerViewAdapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
-//                CallFunction callFunction = new CallFunction();
-//                callFunction.setCancelable(false);
-//                callFunction.show(getSupportFragmentManager(), "callFunction");
-//                int positionOfFunction;
-//                try {
-//                    positionOfFunction = JSON.returnPositionFromJSONArray(JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function"), recyclerViewItemArrayList.get(position).getFunctionName()) + 1;
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                    positionOfFunction = 0;
+                if (didSendRobotSimCommand) {
+                    Toast.makeText(MainActivity.this, "Unable to open editor because simulation is currently running", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                CallFunction callFunction = new CallFunction();
+                callFunction.setCancelable(false);
+                callFunction.show(getSupportFragmentManager(), "callFunction");
+                int positionOfFunction;
+                try {
+                    positionOfFunction = JSON.returnFunctionPositionFromJSONArray(JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function"), recyclerViewItemArrayList.get(position).getFunctionName()) + 1;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    positionOfFunction = 0;
+                }
+
+//                while (!callFunction.canSetSelectionOfFunctionSelector){
+//                    System.out.println("callF: " + callFunction.canSetSelectionOfFunctionSelector);
 //                }
-//
-//                while (!CallFunction.canSetSelectionOfFunctionSelector){
-//
-//                }
-//
-//                CallFunction.setUpFunctionEditing(position, listOfAllFunctionParameters.get(position));
-//                CallFunction.populateComponentsForEditing(positionOfFunction);
+
+                CallFunction.setUpFunctionEditing(position, listOfAllFunctionParameters.get(position));
+                CallFunction.populateComponentsForEditing(positionOfFunction);
             }
         });
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END, ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                if(didSendRobotSimCommand) {
+                if (didSendRobotSimCommand) {
                     recyclerViewAdapter.notifyDataSetChanged();
                     Toast.makeText(MainActivity.this, "Unable to reorder because simulation is currently running", Toast.LENGTH_SHORT).show();
                     return false;
@@ -264,16 +271,19 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 int fromPosition = viewHolder.getAdapterPosition();
                 int toPosition = target.getAdapterPosition();
 
+                Collections.swap(listOfAllFunctionParameters, toPosition, fromPosition);
 
-                if(recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("x") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("x")) {
-                    if(recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("y") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("y")) {
+
+                if (recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("x") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("x")) {
+                    if (recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("y") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("y")) {
                         int robotPointsOffSet = 0;
-                        for(int i = 0; i < fromPosition; i++) {
-                            if(!recyclerViewItemArrayList.get(i).getFunctionParameters().contains("x") && !recyclerViewItemArrayList.get(i).getFunctionParameters().contains("y")) {
+                        for (int i = 0; i < fromPosition; i++) {
+                            if (!recyclerViewItemArrayList.get(i).getFunctionParameters().contains("x") && !recyclerViewItemArrayList.get(i).getFunctionParameters().contains("y")) {
                                 robotPointsOffSet++;
                             }
                         }
-                        Collections.swap(allCoordinates, fromPosition - robotPointsOffSet, toPosition - robotPointsOffSet);
+                        System.out.println("Points offset is: " + robotPointsOffSet);
+                        Collections.swap(allCoordinates, fromPosition - robotPointsOffSet + 1, toPosition - robotPointsOffSet + 1);
                         drawer.drawPointAt(allCoordinates);
                         Collections.swap(robotSimulatorMovementCoordinates, fromPosition - robotPointsOffSet, toPosition - robotPointsOffSet);
                     }
@@ -283,19 +293,16 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 recyclerViewAdapter.notifyItemMoved(fromPosition, toPosition);
 
                 if (currentFilePath.contains("AutosavedFiles")) {
-                    JSON.reorderFunctionsInProgram(fromPosition, toPosition, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
+                    JSON.reorderFunctionsInProgram(fromPosition + 1, toPosition + 1, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
                 } else {
-                    JSON.reorderFunctionsInProgram(fromPosition, toPosition, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/");
+                    JSON.reorderFunctionsInProgram(fromPosition + 1, toPosition + 1, currentFileName, Environment.getExternalStorageDirectory() + "/Innov8rz/");
                 }
-
-                //TODO: add swapping for robotSimulatorMovementCoordinates if the two swapped are movementtypes
-
                 return true;
             }
 
             @Override
             public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
-                if(didSendRobotSimCommand) {
+                if (didSendRobotSimCommand) {
                     recyclerViewAdapter.notifyDataSetChanged();
                     Toast.makeText(MainActivity.this, "Unable to delete because simulation is currently running", Toast.LENGTH_SHORT).show();
                     return;
@@ -306,9 +313,11 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 Coordinate currentC = null;
                 try {
                     currentMP = robotSimulatorMovementCoordinates.get(deletedRowPosition);
-                    currentC = allCoordinates.get(deletedRowPosition);
+                    currentC = allCoordinates.get(deletedRowPosition + 1);
                 } catch (Exception ignore) {
                 }
+
+                final ArrayList<FunctionReturnFormat> currentParameterArray = listOfAllFunctionParameters.get(deletedRowPosition);
 
                 final MovementPose movementPose = currentMP;
                 final Coordinate currentCoordinate = currentC;
@@ -327,8 +336,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                             public void onClick(View v) {
                                 recyclerViewItemArrayList.add(deletedRowPosition, currentItem);
                                 recyclerViewAdapter.notifyDataSetChanged();
+                                listOfAllFunctionParameters.add(deletedRowPosition, currentParameterArray);
                                 if (currentCoordinate != null) {
-                                    allCoordinates.add(deletedRowPosition, currentCoordinate);
+                                    allCoordinates.add(deletedRowPosition + 1, currentCoordinate);
                                     drawer.drawPointAt(allCoordinates);
                                 }
                                 if (movementPose != null) {
@@ -342,14 +352,15 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 if (recyclerViewItemArrayList.get(deletedRowPosition).getFunctionParameters().contains("x:")) {
                     if (recyclerViewItemArrayList.get(deletedRowPosition).getFunctionParameters().contains("y:")) {
                         robotSimulatorMovementCoordinates.remove(deletedRowPosition);
-                        allCoordinates.remove(deletedRowPosition);
+                        allCoordinates.remove(deletedRowPosition + 1);
                     }
                 }
+                listOfAllFunctionParameters.remove(deletedRowPosition);
                 drawer.drawPointAt(allCoordinates);
                 recyclerViewItemArrayList.remove(deletedRowPosition);
                 recyclerViewAdapter.notifyDataSetChanged();
                 if (jsonArray != null) {
-                    JSON.removeFromJSONTextFile(currentFileName, currentFilePath, deletedRowPosition, JSON.JSONArchitecture.DefaultRobotController_Notation);
+                    JSON.removeFromJSONTextFile(currentFileName, currentFilePath, deletedRowPosition + 1, JSON.JSONArchitecture.DefaultRobotController_Notation);
                 } else {
                     throw new NullPointerException("Unable to find program file onDeletion (onSwiped) at Line: 224, Main Activity");
                 }
@@ -376,6 +387,20 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         recyclerViewAdapter.notifyDataSetChanged();
     }
 
+    private void setRecyclerView(String functionName, ArrayList<FunctionReturnFormat> functionParameters, int position) {
+        StringBuilder parametersOfFunction = new StringBuilder();
+
+        if (functionParameters.size() >= 1) {
+            for (int i = 0; i < functionParameters.size() - 1; i++) {
+                parametersOfFunction.append(functionParameters.get(i).parameterName + ": " + functionParameters.get(i).parameterValue + ", ");
+            }
+            parametersOfFunction.append(functionParameters.get(functionParameters.size() - 1).parameterName + ": " + functionParameters.get(functionParameters.size() - 1).parameterValue);
+        }
+
+        recyclerViewItemArrayList.set(position, new RecyclerViewItem(functionName, parametersOfFunction.toString()));
+        recyclerViewAdapter.notifyDataSetChanged();
+    }
+
     private boolean canRunFABThread;
     private Thread fabuttonThread;
 
@@ -387,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            if(!didSendRobotSimCommand) {
+                            if (!didSendRobotSimCommand) {
                                 com.github.sealstudios.fab.FloatingActionButton robotOrigin = findViewById(R.id.setOrigin);
                                 com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
                                 com.github.sealstudios.fab.FloatingActionButton editFunction = findViewById(R.id.editFunction);
@@ -443,7 +468,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                                 }
 
 
-                                if(!didSendRobotSimCommand) {
+                                if (!didSendRobotSimCommand) {
                                     drawer.drawPointAt(allCoordinates);
                                 }
                             } else {
@@ -486,7 +511,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         super.onDestroy();
     }
 
-    /** Menu Item Creation and OnClickListeners **/
+    /**
+     * Menu Item Creation and OnClickListeners
+     **/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -510,7 +537,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (robotSimulatorMovementCoordinates.size() >= 1) {
-            if(Odometry.runThread && didSendRobotSimCommand) {
+            if (Odometry.runThread && didSendRobotSimCommand) {
                 return false;
             } else {
                 didSendRobotSimCommand = false;
@@ -527,7 +554,9 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         super.invalidateOptionsMenu();
     }
 
-    /** Callback functions from Dialogs **/
+    /**
+     * Callback functions from Dialogs
+     **/
 
     @Override
     public void setRobotOrigin(Pose robotOrigin) {
@@ -536,14 +565,14 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     private void setOrigin(Pose robotOrigin, boolean isNewFile) {
         this.robotOrigin = robotOrigin;
-        if(isNewFile) {
+        if (isNewFile) {
             allCoordinates.clear();
         } else {
             allCoordinates.remove(0);
         }
         allCoordinates.add(0, new Coordinate(robotOrigin.x, robotOrigin.y));
         drawer.drawPointAt(allCoordinates);
-        if(doesHaveToCreateNewFile) {
+        if (doesHaveToCreateNewFile) {
             String fileName = "program";
             allCoordinates.clear();
             allCoordinates.add(new Coordinate(robotOrigin.x, robotOrigin.y));
@@ -681,6 +710,77 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     allCoordinates.add(new Coordinate(x, y));
                     drawer.drawPointAt(allCoordinates);
                 }
+            } else {
+                listOfAllFunctionParameters.set(positionOfEdit, functionParameters);
+                setRecyclerView(functionName, functionParameters, positionOfEdit);
+                try {
+                    JSONArray filteredJSONArray = new JSONArray();
+                    JSONArray jsonArray = JSON.readJSONTextFile(currentFileName, currentFilePath).getJSONArray("program");
+                    int len = jsonArray.length();
+                    if (jsonArray != null) {
+                        for (int i=0;i<len;i++)
+                        {
+                            //Excluding the item at position
+                            if (i != positionOfEdit + 1)
+                            {
+                                filteredJSONArray.put(jsonArray.get(i));
+                            }
+                        }
+                    }
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("functionName", functionName);
+                    if (!movementType.equals("None")) {
+                        jsonObject.put("movementType", movementType);
+                    }
+                    JSONObject parameterObject = new JSONObject();
+
+                    for (int i = 0; i < functionParameters.size(); i++) {
+                        parameterObject.put(functionParameters.get(i).parameterName, functionParameters.get(i).parameterValue);
+                    }
+
+                    jsonObject.put("parameters", parameterObject);
+                    filteredJSONArray.put(positionOfEdit + 1, jsonObject);
+
+                    JSON.writeJSONToTextFile(currentFileName, currentFilePath, filteredJSONArray, JSON.JSONArchitecture.DefaultRobotController_Notation);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if (isDrivetrainFunction) {
+                    double x = 0, y = 0, theta = 0;
+                    for (int i = 0; i < functionParameters.size(); i++) {
+                        if (functionParameters.get(i).parameterName.equals("x")) {
+                            if (functionParameters.get(i).parameterValue instanceof Integer) {
+                                x = (double) ((Integer) functionParameters.get(i).parameterValue).intValue();
+                            } else {
+                                x = (double) functionParameters.get(i).parameterValue;
+                            }
+                        } else if (functionParameters.get(i).parameterName.equals("y")) {
+                            if (functionParameters.get(i).parameterValue instanceof Integer) {
+                                y = (double) ((Integer) functionParameters.get(i).parameterValue).intValue();
+                            } else {
+                                y = (double) functionParameters.get(i).parameterValue;
+                            }
+                        } else if (functionParameters.get(i).parameterName.equals("heading")) {
+                            if (functionParameters.get(i).parameterValue instanceof Integer) {
+                                theta = (double) ((Integer) functionParameters.get(i).parameterValue).intValue();
+                            } else {
+                                theta = (double) functionParameters.get(i).parameterValue;
+                            }
+                        }
+                    }
+                    if (movementType.equals("Strafe")) {
+                        robotSimulatorMovementCoordinates.set(positionOfEdit, new MovementPose(new Pose(x, y, Math.toRadians(theta)), MovementPose.MovementType.strafe));
+                    } else if (movementType.equals("TankForward")) {
+                        robotSimulatorMovementCoordinates.set(positionOfEdit, new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveForward));
+                    } else if (movementType.equals("TankBackward")) {
+                        robotSimulatorMovementCoordinates.set(positionOfEdit, new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveBackward));
+                    } else if (movementType.equals("PurePursuit")) {
+                        robotSimulatorMovementCoordinates.set(positionOfEdit, new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.purePursuit));
+                    }
+                    allCoordinates.set(positionOfEdit + 1, new Coordinate(x, y));
+                    drawer.drawPointAt(allCoordinates);
+                }
             }
         }
     }
@@ -753,8 +853,13 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
         doesHaveToCreateNewFile = false;
         setOrigin(robotOrigin, true);
+
         if (fileFunctions.size() >= 1) {
             for (int i = 0; i < fileFunctions.size(); i++) {
+                ArrayList<FunctionReturnFormat> functionParameters = new ArrayList<>();
+                for (int x = 0; x < fileFunctions.get(i).parameters.size(); x++) {
+                    functionParameters.add(new FunctionReturnFormat(fileFunctions.get(i).parameters.get(x).parameterName, fileFunctions.get(i).parameters.get(x).parameterValue));
+                }
                 addToRecyclerView(fileFunctions.get(i).functionName, fileFunctions.get(i).parameters);
                 if (fileFunctions.get(i).isDrivetrain) {
                     double x = 0, y = 0, heading = 0;
@@ -781,18 +886,19 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     }
                     allCoordinates.add(new Coordinate(x, y));
                     drawer.drawPointAt(allCoordinates);
-                    if(!fileFunctions.get(i).movementType.equals("None")) {
-                        if(fileFunctions.get(i).movementType.equals("Strafe")) {
+                    if (!fileFunctions.get(i).movementType.equals("None")) {
+                        if (fileFunctions.get(i).movementType.equals("Strafe")) {
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(heading)), MovementPose.MovementType.strafe));
-                        } else if(fileFunctions.get(i).movementType.equals("TankForward")) {
+                        } else if (fileFunctions.get(i).movementType.equals("TankForward")) {
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveForward));
-                        } else if(fileFunctions.get(i).movementType.equals("TankBackward")) {
+                        } else if (fileFunctions.get(i).movementType.equals("TankBackward")) {
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveBackward));
                         } else if (fileFunctions.get(i).movementType.equals("PurePursuit")) {
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.purePursuit));
                         }
                     }
                 }
+                listOfAllFunctionParameters.add(functionParameters);
             }
         } else {
             Toast.makeText(this, "Selected file is empty", Toast.LENGTH_SHORT).show();

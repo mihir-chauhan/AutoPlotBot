@@ -124,7 +124,7 @@ public class LoadFile extends AppCompatDialogFragment {
 
                                 returnFormatArrayList.add(new LoadFileReturnFormat(functionName, movementType, functionReturnFormatArrayList, isDrivetrain));
                             } catch (Exception ignore) {
-                                robotOrigin = new Pose(jsonArray.getJSONObject(i).getDouble("x"), jsonArray.getJSONObject(i).getDouble("y"), jsonArray.getJSONObject(i).getDouble("heading"));
+                                robotOrigin = new Pose(jsonArray.getJSONObject(i).getDouble("x"), jsonArray.getJSONObject(i).getDouble("y"),  Math.toRadians(jsonArray.getJSONObject(i).getDouble("heading")));
                             }
                         }
                     } catch (Exception e) {

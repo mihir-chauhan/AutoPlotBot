@@ -26,6 +26,7 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import com.example.odometryapp_v10.Main.FunctionReturnFormat;
 import com.example.odometryapp_v10.Main.JSON;
 import com.example.odometryapp_v10.R;
+import com.example.odometryapp_v10.RobotDimensions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,6 +47,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     public boolean canSetSelectionOfFunctionSelector = false;
     public static boolean isEditingFunction = false;
     private MovementType movementType;
+    private Spinner positionOnRobot;
     private enum ParameterTypes {
         String, Integer, Double, Boolean
     }
@@ -97,6 +99,88 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                     parametersArray.add(new FunctionReturnFormat(functionName, functionParameter));
                 }
                 //returns array of format: [["parameterName", "parameterValue"], ["...", "..."], ["...", "..."], ...]
+                if(isSelectedFunctionADrivetrainFunction) {
+                    switch (positionOnRobot.getSelectedItemPosition()) {
+                        case 0:
+                            if (parametersArray.get(0).parameterValue instanceof Integer) {
+                                parametersArray.get(0).parameterValue = (double) ((Integer) parametersArray.get(0).parameterValue).intValue() + RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(0).parameterValue = (double) parametersArray.get(0).parameterValue + RobotDimensions.halfRobotWidth;
+                            }
+                            if (parametersArray.get(1).parameterValue instanceof Integer) {
+                                parametersArray.get(1).parameterValue = (double) ((Integer) parametersArray.get(1).parameterValue).intValue() - RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(1).parameterValue = (double) parametersArray.get(1).parameterValue - RobotDimensions.halfRobotWidth;
+                            }
+                            break;
+                        case 1:
+                            if (parametersArray.get(1).parameterValue instanceof Integer) {
+                                parametersArray.get(1).parameterValue = (double) ((Integer) parametersArray.get(1).parameterValue).intValue() - RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(1).parameterValue = (double) parametersArray.get(1).parameterValue - RobotDimensions.halfRobotWidth;
+                            }
+                            break;
+                        case 2:
+                            if (parametersArray.get(0).parameterValue instanceof Integer) {
+                                parametersArray.get(0).parameterValue = (double) ((Integer) parametersArray.get(0).parameterValue).intValue() - RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(0).parameterValue = (double) parametersArray.get(0).parameterValue - RobotDimensions.halfRobotWidth;
+                            }
+                            if (parametersArray.get(1).parameterValue instanceof Integer) {
+                                parametersArray.get(1).parameterValue = (double) ((Integer) parametersArray.get(1).parameterValue).intValue() - RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(1).parameterValue = (double) parametersArray.get(1).parameterValue - RobotDimensions.halfRobotWidth;
+                            }
+                            break;
+                        case 3:
+                            if (parametersArray.get(0).parameterValue instanceof Integer) {
+                                parametersArray.get(0).parameterValue = (double) ((Integer) parametersArray.get(0).parameterValue).intValue() + RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(0).parameterValue = (double) parametersArray.get(0).parameterValue + RobotDimensions.halfRobotWidth;
+                            }
+                            break;
+                        case 4:
+                            break;
+                        case 5:
+                            if (parametersArray.get(0).parameterValue instanceof Integer) {
+                                parametersArray.get(0).parameterValue = (double) ((Integer) parametersArray.get(0).parameterValue).intValue() - RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(0).parameterValue = (double) parametersArray.get(0).parameterValue - RobotDimensions.halfRobotWidth;
+                            }
+                            break;
+                        case 6:
+                            if (parametersArray.get(0).parameterValue instanceof Integer) {
+                                parametersArray.get(0).parameterValue = (double) ((Integer) parametersArray.get(0).parameterValue).intValue() + RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(0).parameterValue = (double) parametersArray.get(0).parameterValue + RobotDimensions.halfRobotWidth;
+                            }
+                            if (parametersArray.get(1).parameterValue instanceof Integer) {
+                                parametersArray.get(1).parameterValue = (double) ((Integer) parametersArray.get(1).parameterValue).intValue() + RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(1).parameterValue = (double) parametersArray.get(1).parameterValue + RobotDimensions.halfRobotWidth;
+                            }
+                            break;
+                        case 7:
+                            if (parametersArray.get(1).parameterValue instanceof Integer) {
+                                parametersArray.get(1).parameterValue = (double) ((Integer) parametersArray.get(1).parameterValue).intValue() + RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(1).parameterValue = (double) parametersArray.get(1).parameterValue + RobotDimensions.halfRobotWidth;
+                            }
+                            break;
+                        case 8:
+                            if (parametersArray.get(0).parameterValue instanceof Integer) {
+                                parametersArray.get(0).parameterValue = (double) ((Integer) parametersArray.get(0).parameterValue).intValue() - RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(0).parameterValue = (double) parametersArray.get(0).parameterValue - RobotDimensions.halfRobotWidth;
+                            }
+                            if (parametersArray.get(1).parameterValue instanceof Integer) {
+                                parametersArray.get(1).parameterValue = (double) ((Integer) parametersArray.get(1).parameterValue).intValue() + RobotDimensions.halfRobotWidth;
+                            } else {
+                                parametersArray.get(1).parameterValue = (double) parametersArray.get(1).parameterValue + RobotDimensions.halfRobotWidth;
+                            }
+                            break;
+                    }
+                }
                 listener.callFunction(selectedFunctionName, parametersArray, isSelectedFunctionADrivetrainFunction, isEditingFunction, positionToEDIT, movementType.toString());
             }
         });
@@ -115,6 +199,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
     private void initializeDialogComponents() {
         functionSelectorSpinner = view.findViewById(R.id.functionSelector);
+        positionOnRobot = view.findViewById(R.id.callFunctionPositionOnRobot);
         List<String> spinnerArray = new ArrayList<>();
         spinnerArray.add("Select A Function To Call");
         try {
@@ -178,6 +263,12 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                 if (jsonArray != null) {
                     int i = returnPositionFromJSONArray(jsonArray, functionName);
                     isSelectedFunctionADrivetrainFunction = jsonArray.getJSONObject(i).getString("functionType").equals("Drivetrain");
+                    if(isSelectedFunctionADrivetrainFunction) {
+                        positionOnRobot.setVisibility(View.VISIBLE);
+                        positionOnRobot.setSelection(4);
+                    } else {
+                        positionOnRobot.setVisibility(View.GONE);
+                    }
                     try {
                         if (jsonArray.getJSONObject(i).getString("movementType").equals("Tank Forward")) {
                             movementType = MovementType.TankForward;

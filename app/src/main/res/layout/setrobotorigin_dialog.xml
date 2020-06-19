@@ -49,4 +49,15 @@
         android:inputType="numberDecimal"
         android:hint="Heading"
         />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_below="@id/originHeading"
+        android:layout_marginTop="16dp"
+        android:entries="@array/positionsOnRobot"
+        android:id="@+id/robotOriginPositionsOnRobot"
+
+        />
 </RelativeLayout>

@@ -653,15 +653,12 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                 try {
                     JSONArray filteredJSONArray = new JSONArray();
                     JSONArray jsonArray = JSON.readJSONTextFile(currentFileName, currentFilePath).getJSONArray("program");
-                    int len = jsonArray.length();
                     if (jsonArray != null) {
-                        for (int i=0;i<len;i++)
-                        {
+                        for (int i = 0; i < jsonArray.length(); i++) {
                             //Excluding the item at position
-                            if (i != positionOfEdit + 1)
-                            {
-                                filteredJSONArray.put(jsonArray.get(i));
-                            }
+//                            if (i != positionOfEdit + 1) {
+                                filteredJSONArray.put(jsonArray.getJSONObject(i));
+//                            }
                         }
                     }
                     JSONObject jsonObject = new JSONObject();

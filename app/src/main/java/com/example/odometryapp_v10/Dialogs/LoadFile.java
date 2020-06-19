@@ -20,6 +20,7 @@ import com.example.odometryapp_v10.Main.FunctionReturnFormat;
 import com.example.odometryapp_v10.Main.JSON;
 import com.example.odometryapp_v10.Main.LoadFileReturnFormat;
 import com.example.odometryapp_v10.R;
+import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,7 +37,7 @@ public class LoadFile extends AppCompatDialogFragment {
     private loadProgramListener listener;
     private View view;
     String fileName = "";
-    Coordinate robotOrigin = new Coordinate(0,0);
+    Pose robotOrigin = new Pose(0,0, Math.toRadians(90));
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
@@ -123,7 +124,7 @@ public class LoadFile extends AppCompatDialogFragment {
 
                                 returnFormatArrayList.add(new LoadFileReturnFormat(functionName, movementType, functionReturnFormatArrayList, isDrivetrain));
                             } catch (Exception ignore) {
-                                robotOrigin = new Coordinate(jsonArray.getJSONObject(i).getDouble("x"), jsonArray.getJSONObject(i).getDouble("y"));
+                                robotOrigin = new Pose(jsonArray.getJSONObject(i).getDouble("x"), jsonArray.getJSONObject(i).getDouble("y"), jsonArray.getJSONObject(i).getDouble("heading"));
                             }
                         }
                     } catch (Exception e) {
@@ -153,6 +154,6 @@ public class LoadFile extends AppCompatDialogFragment {
     }
 
     public interface loadProgramListener {
-        void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> filePrograms, Coordinate robotOrigin);
+        void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> filePrograms, Pose robotOrigin);
     }
 }

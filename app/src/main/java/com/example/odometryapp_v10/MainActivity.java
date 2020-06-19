@@ -95,8 +95,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
         drawer = new CanvasRobotDrawer(this, findViewById(android.R.id.content).getRootView(), MainActivity.this);
 
-        allCoordinates.add(new Coordinate(robotOrigin.x, robotOrigin.y));
-        drawer.drawPointAt(allCoordinates);
+        setOrigin(new Pose(0, 0, Math.toRadians(90)), true);
 
         com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
         addNewFunction.setOnClickListener(new View.OnClickListener() {
@@ -162,8 +161,16 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 recyclerViewItemArrayList.clear();
                 recyclerViewAdapter.notifyDataSetChanged();
                 doesHaveToCreateNewFile = true;
-                allCoordinates.clear();
-                drawer.drawPointAt(allCoordinates);
+                isEditingLoadedFile = false;
+                String fileName = "program";
+                SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
+                Date date = new Date();
+                fileName += "-" + formatter.format(date);
+                JSON.createFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
+                doesHaveToCreateNewFile = false;
+                currentFileName = fileName;
+                currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/";
+                setOrigin(new Pose(0, 0, Math.toRadians(90)), true);
                 robotSimulatorMovementCoordinates.clear();
             }
         });
@@ -524,10 +531,63 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
     @Override
     public void setRobotOrigin(Pose robotOrigin) {
+        setOrigin(robotOrigin, false);
+    }
+
+    private void setOrigin(Pose robotOrigin, boolean isNewFile) {
         this.robotOrigin = robotOrigin;
-        allCoordinates.remove(0);
+        if(isNewFile) {
+            allCoordinates.clear();
+        } else {
+            allCoordinates.remove(0);
+        }
         allCoordinates.add(0, new Coordinate(robotOrigin.x, robotOrigin.y));
         drawer.drawPointAt(allCoordinates);
+        if(doesHaveToCreateNewFile) {
+            String fileName = "program";
+            allCoordinates.clear();
+            allCoordinates.add(new Coordinate(robotOrigin.x, robotOrigin.y));
+            SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy_HH-mm-ss");
+            Date date = new Date();
+            fileName += "-" + formatter.format(date);
+            JSON.createFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/");
+            doesHaveToCreateNewFile = false;
+            currentFileName = fileName;
+            currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/";
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("x", robotOrigin.x);
+                jsonObject.put("y", robotOrigin.y);
+                jsonObject.put("heading", Math.toDegrees(robotOrigin.heading));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            JSON.appendJSONToTextFile(currentFileName, currentFilePath, jsonObject, null, JSON.JSONArchitecture.DefaultRobotController_Notation);
+        } else {
+            try {
+                JSONArray jsonArray = JSON.readJSONTextFile(currentFileName, currentFilePath).getJSONArray("program");
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("x", robotOrigin.x);
+                jsonObject.put("y", robotOrigin.y);
+                jsonObject.put("heading", Math.toDegrees(robotOrigin.heading));
+                jsonArray.put(0, jsonObject);
+                JSON.writeJSONToTextFile(currentFileName, currentFilePath, jsonArray, JSON.JSONArchitecture.DefaultRobotController_Notation);
+            } catch (Exception ignore) {
+                try {
+                    JSONObject fileObject = new JSONObject();
+                    JSONArray jsonArray = new JSONArray();
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("x", robotOrigin.x);
+                    jsonObject.put("y", robotOrigin.y);
+                    jsonObject.put("heading", Math.toDegrees(robotOrigin.heading));
+                    jsonArray.put(jsonObject);
+                    fileObject.put("program", jsonArray);
+                    JSON.writeJSONToTextFile(currentFileName, currentFilePath, fileObject);
+                } catch (JSONException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override
@@ -684,8 +744,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
     }
 
     @Override
-    public void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> fileFunctions, Coordinate robotOrigin) {
-        allCoordinates.clear();
+    public void loadProgram(String fileName, ArrayList<LoadFileReturnFormat> fileFunctions, Pose robotOrigin) {
         robotSimulatorMovementCoordinates.clear();
         recyclerViewItemArrayList.clear();
         recyclerViewAdapter.notifyDataSetChanged();
@@ -693,7 +752,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         currentFileName = fileName;
         currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
         doesHaveToCreateNewFile = false;
-        allCoordinates.add(0, robotOrigin);
+        setOrigin(robotOrigin, true);
         if (fileFunctions.size() >= 1) {
             for (int i = 0; i < fileFunctions.size(); i++) {
                 addToRecyclerView(fileFunctions.get(i).functionName, fileFunctions.get(i).parameters);

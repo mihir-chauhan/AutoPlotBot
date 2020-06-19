@@ -32,7 +32,7 @@ public class RobotOrigin extends AppCompatDialogFragment {
         }).setPositiveButton("done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                listener.setRobotOrigin(new Pose(Double.parseDouble(x.getText().toString()), Double.parseDouble(y.getText().toString()), Double.parseDouble(heading.getText().toString())));
+                listener.setRobotOrigin(new Pose(Double.parseDouble(x.getText().toString()), Double.parseDouble(y.getText().toString()), Math.toRadians(Double.parseDouble(heading.getText().toString()))));
             }
         });
 

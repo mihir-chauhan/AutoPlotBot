@@ -36,6 +36,7 @@ public class LoadFile extends AppCompatDialogFragment {
     private loadProgramListener listener;
     private View view;
     String fileName = "";
+    Coordinate robotOrigin = new Coordinate(0,0);
 
     @Override
     public Dialog onCreateDialog(final Bundle savedInstanceState) {
@@ -54,7 +55,7 @@ public class LoadFile extends AppCompatDialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 fileName = fileName.replace(".txt", "");
-                listener.loadProgram(fileName, returnFormatArrayList);
+                listener.loadProgram(fileName, returnFormatArrayList, robotOrigin);
             }
         });
 
@@ -122,7 +123,7 @@ public class LoadFile extends AppCompatDialogFragment {
 
                                 returnFormatArrayList.add(new LoadFileReturnFormat(functionName, movementType, functionReturnFormatArrayList, isDrivetrain));
                             } catch (Exception ignore) {
-
+                                robotOrigin = new Coordinate(jsonArray.getJSONObject(i).getDouble("x"), jsonArray.getJSONObject(i).getDouble("y"));
                             }
                         }
                     } catch (Exception e) {

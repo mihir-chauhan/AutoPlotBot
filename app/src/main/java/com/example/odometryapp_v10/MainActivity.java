@@ -693,6 +693,7 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
         currentFileName = fileName;
         currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/";
         doesHaveToCreateNewFile = false;
+        allCoordinates.add(0, robotOrigin);
         if (fileFunctions.size() >= 1) {
             for (int i = 0; i < fileFunctions.size(); i++) {
                 addToRecyclerView(fileFunctions.get(i).functionName, fileFunctions.get(i).parameters);

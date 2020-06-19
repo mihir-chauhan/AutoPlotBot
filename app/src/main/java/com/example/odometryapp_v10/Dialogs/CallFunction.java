@@ -182,6 +182,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                     }
                 }
                 listener.callFunction(selectedFunctionName, parametersArray, isSelectedFunctionADrivetrainFunction, isEditingFunction, positionToEDIT, movementType.toString());
+                isEditingFunction = false;
             }
         });
         return builder.create();

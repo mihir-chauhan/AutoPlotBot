@@ -143,6 +143,7 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                 currentFilePath = Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/";
                 setOrigin(new Pose(0, 0, Math.toRadians(90)), true);
                 robotSimulatorMovementCoordinates.clear();
+                listOfAllFunctionParameters.clear();
             }
         });
 

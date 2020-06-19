@@ -17,16 +17,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.odometryapp_v10.Dialogs.AddNewFunction;
 import com.example.odometryapp_v10.Dialogs.CallFunction;
-import com.example.odometryapp_v10.Dialogs.EditFunction;
 import com.example.odometryapp_v10.Dialogs.LoadFile;
 import com.example.odometryapp_v10.Dialogs.RobotOrigin;
 import com.example.odometryapp_v10.Dialogs.SaveFile;
@@ -41,7 +36,6 @@ import com.example.odometryapp_v10.RobotSimulation.MovementPose;
 import com.example.odometryapp_v10.RobotSimulation.RobotSim;
 import com.example.odometryapp_v10.RobotSimulation.Structure.Odometry;
 import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
-import com.github.sealstudios.fab.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
@@ -50,16 +44,13 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.net.Inet4Address;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 
-public class MainActivity extends AppCompatActivity implements AddNewFunction.addNewFunctionListener, CallFunction.callFunctionListener, EditFunction.editFunctionListener, SaveFile.saveProgramListener, LoadFile.loadProgramListener, RobotOrigin.robotOriginListener {
+public class MainActivity extends AppCompatActivity implements CallFunction.callFunctionListener, SaveFile.saveProgramListener, LoadFile.loadProgramListener, RobotOrigin.robotOriginListener {
     com.github.sealstudios.fab.FloatingActionButton callFunction;
-    com.github.sealstudios.fab.FloatingActionButton editFunction;
     com.github.sealstudios.fab.FloatingActionButton saveFunction;
     com.github.sealstudios.fab.FloatingActionButton loadFunction;
     TextView simulate;
@@ -97,16 +88,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
 
         setOrigin(new Pose(0, 0, Math.toRadians(90)), true);
 
-        com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
-        addNewFunction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AddNewFunction addNewFunction = new AddNewFunction();
-                addNewFunction.setCancelable(false);
-                addNewFunction.show(getSupportFragmentManager(), "addNewFunction");
-            }
-        });
-
         callFunction = findViewById(R.id.callFunction);
         callFunction.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,16 +95,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                 CallFunction callFunction = new CallFunction();
                 callFunction.setCancelable(false);
                 callFunction.show(getSupportFragmentManager(), "callFunction");
-            }
-        });
-
-        editFunction = findViewById(R.id.editFunction);
-        editFunction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditFunction editFunction = new EditFunction();
-                editFunction.setCancelable(false);
-                editFunction.show(getSupportFragmentManager(), "editFunction");
             }
         });
 
@@ -414,16 +385,12 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                         public void run() {
                             if (!didSendRobotSimCommand) {
                                 com.github.sealstudios.fab.FloatingActionButton robotOrigin = findViewById(R.id.setOrigin);
-                                com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
-                                com.github.sealstudios.fab.FloatingActionButton editFunction = findViewById(R.id.editFunction);
                                 com.github.sealstudios.fab.FloatingActionButton callFunction = findViewById(R.id.callFunction);
                                 com.github.sealstudios.fab.FloatingActionButton saveProgram = findViewById(R.id.saveFile);
                                 com.github.sealstudios.fab.FloatingActionButton loadProgram = findViewById(R.id.uploadFile);
                                 com.github.sealstudios.fab.FloatingActionButton newProgram = findViewById(R.id.newProgram);
 
                                 robotOrigin.setEnabled(!didSendRobotSimCommand);
-                                addNewFunction.setEnabled(!didSendRobotSimCommand);
-                                editFunction.setEnabled(!didSendRobotSimCommand);
                                 callFunction.setEnabled(!didSendRobotSimCommand);
                                 saveProgram.setEnabled(!didSendRobotSimCommand);
                                 loadProgram.setEnabled(!didSendRobotSimCommand);
@@ -433,18 +400,14 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                                     try {
                                         if (JSON.readJSONTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/").getJSONArray("function").length() >= 1) {
                                             callFunction.setEnabled(true);
-                                            editFunction.setEnabled(true);
                                         } else {
                                             callFunction.setEnabled(false);
-                                            editFunction.setEnabled(false);
                                         }
                                     } catch (Exception ignore) {
                                         callFunction.setEnabled(false);
-                                        editFunction.setEnabled(false);
                                     }
                                 } else {
                                     callFunction.setEnabled(false);
-                                    editFunction.setEnabled(false);
                                 }
                                 if (recyclerViewItemArrayList.size() >= 1) {
                                     saveFunction.setEnabled(true);
@@ -473,16 +436,12 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                                 }
                             } else {
                                 com.github.sealstudios.fab.FloatingActionButton robotOrigin = findViewById(R.id.setOrigin);
-                                com.github.sealstudios.fab.FloatingActionButton addNewFunction = findViewById(R.id.addNewFunction);
-                                com.github.sealstudios.fab.FloatingActionButton editFunction = findViewById(R.id.editFunction);
                                 com.github.sealstudios.fab.FloatingActionButton callFunction = findViewById(R.id.callFunction);
                                 com.github.sealstudios.fab.FloatingActionButton saveProgram = findViewById(R.id.saveFile);
                                 com.github.sealstudios.fab.FloatingActionButton loadProgram = findViewById(R.id.uploadFile);
                                 com.github.sealstudios.fab.FloatingActionButton newProgram = findViewById(R.id.newProgram);
 
                                 robotOrigin.setEnabled(!didSendRobotSimCommand);
-                                addNewFunction.setEnabled(!didSendRobotSimCommand);
-                                editFunction.setEnabled(!didSendRobotSimCommand);
                                 callFunction.setEnabled(!didSendRobotSimCommand);
                                 saveProgram.setEnabled(!didSendRobotSimCommand);
                                 loadProgram.setEnabled(!didSendRobotSimCommand);
@@ -616,28 +575,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
                     ex.printStackTrace();
                 }
             }
-        }
-    }
-
-    @Override
-    public void addNewFunction(String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType, String movementType) {
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("functionName", functionName);
-            jsonObject.put("functionType", functionType);
-            if (movementType != null) {
-                jsonObject.put("movementType", movementType);
-            }
-            JSONObject paramObject = new JSONObject();
-            for (int parameter = 0; parameter < allParameters.size(); parameter++) {
-                paramObject.put(allParameters.get(parameter).get(0).toString(), allParameters.get(parameter).get(1).toString());
-            }
-
-            jsonObject.put("parameters", paramObject);
-
-            JSON.appendJSONToTextFile("functions", Environment.getExternalStorageDirectory() + "/Documents/", jsonObject, null, JSON.JSONArchitecture.Function_Notation);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -792,25 +729,6 @@ public class MainActivity extends AppCompatActivity implements AddNewFunction.ad
             }
         }
         return false;
-    }
-
-    @Override
-    public void editFunction(int originalFunctionPosition, String functionName, ArrayList<ArrayList<Object>> allParameters, String functionType) {
-        try {
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("functionName", functionName);
-            jsonObject.put("functionType", functionType);
-            JSONObject paramObject = new JSONObject();
-            for (int parameter = 0; parameter < allParameters.size(); parameter++) {
-                paramObject.put(allParameters.get(parameter).get(0).toString(), allParameters.get(parameter).get(1).toString());
-            }
-
-            jsonObject.put("parameters", paramObject);
-
-            JSON.replaceInJSONTextFile("functions", originalFunctionPosition, Environment.getExternalStorageDirectory() + "/Documents/", jsonObject, null, JSON.JSONArchitecture.Function_Notation);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

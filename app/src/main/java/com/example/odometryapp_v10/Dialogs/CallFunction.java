@@ -53,7 +53,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     }
 
     private enum MovementType {
-        TankForward, TankBackward, Strafe, PurePursuit, None
+        TankForward, TankBackward, Strafe, PurePursuit, Turn, None
     }
 
     @Override
@@ -279,6 +279,8 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                             movementType = MovementType.Strafe;
                         } else if (jsonArray.getJSONObject(i).getString("movementType").equals("Pure Pursuit")) {
                             movementType = MovementType.PurePursuit;
+                        } else if (jsonArray.getJSONObject(i).getString("movementType").equals("Turn")) {
+                            movementType = MovementType.Turn;
                         }
                     } catch (Exception ignore) {
                         movementType = MovementType.None;

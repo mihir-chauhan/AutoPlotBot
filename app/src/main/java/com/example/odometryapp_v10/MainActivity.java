@@ -520,6 +520,10 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
 
     @Override
     public void setRobotOrigin(Pose robotOrigin) {
+        if(previousX == 0 && previousY == 0) {
+            previousX = robotOrigin.x;
+            previousY = robotOrigin.y;
+        }
         setOrigin(robotOrigin, false);
     }
 
@@ -582,6 +586,7 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
     ArrayList<ArrayList<FunctionReturnFormat>> listOfAllFunctionParameters = new ArrayList<>();
     String currentFileName;
     String currentFilePath;
+    double previousX = 0, previousY = 0;
 
     @Override
     public void callFunction(String functionName, ArrayList<FunctionReturnFormat> functionParameters, boolean isDrivetrainFunction, boolean isEditing, int positionOfEdit, String movementType) {
@@ -638,15 +643,31 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                     }
                     if (movementType.equals("Strafe")) {
                         robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(theta)), MovementPose.MovementType.strafe));
+                        previousX = x;
+                        previousY = y;
+                        allCoordinates.add(new Coordinate(x, y));
+                        drawer.drawPointAt(allCoordinates);
                     } else if (movementType.equals("TankForward")) {
                         robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveForward));
+                        previousX = x;
+                        previousY = y;
+                        allCoordinates.add(new Coordinate(x, y));
+                        drawer.drawPointAt(allCoordinates);
                     } else if (movementType.equals("TankBackward")) {
                         robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveBackward));
+                        previousX = x;
+                        previousY = y;
+                        allCoordinates.add(new Coordinate(x, y));
+                        drawer.drawPointAt(allCoordinates);
                     } else if (movementType.equals("PurePursuit")) {
                         robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.purePursuit));
+                        previousX = x;
+                        previousY = y;
+                        allCoordinates.add(new Coordinate(x, y));
+                        drawer.drawPointAt(allCoordinates);
+                    } else if(movementType.equals("Turn")) {
+                        robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(previousX, previousY, Math.toRadians(theta)), MovementPose.MovementType.turn));
                     }
-                    allCoordinates.add(new Coordinate(x, y));
-                    drawer.drawPointAt(allCoordinates);
                 }
             } else {
                 listOfAllFunctionParameters.set(positionOfEdit, functionParameters);
@@ -706,15 +727,24 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                     }
                     if (movementType.equals("Strafe")) {
                         robotSimulatorMovementCoordinates.set(positionOfEdit, new MovementPose(new Pose(x, y, Math.toRadians(theta)), MovementPose.MovementType.strafe));
+                        allCoordinates.set(positionOfEdit + 1, new Coordinate(x, y));
+                        drawer.drawPointAt(allCoordinates);
                     } else if (movementType.equals("TankForward")) {
                         robotSimulatorMovementCoordinates.set(positionOfEdit, new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveForward));
+                        allCoordinates.set(positionOfEdit + 1, new Coordinate(x, y));
+                        drawer.drawPointAt(allCoordinates);
                     } else if (movementType.equals("TankBackward")) {
                         robotSimulatorMovementCoordinates.set(positionOfEdit, new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.moveBackward));
+                        allCoordinates.set(positionOfEdit + 1, new Coordinate(x, y));
+                        drawer.drawPointAt(allCoordinates);
                     } else if (movementType.equals("PurePursuit")) {
                         robotSimulatorMovementCoordinates.set(positionOfEdit, new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.purePursuit));
+                        allCoordinates.set(positionOfEdit + 1, new Coordinate(x, y));
+                        drawer.drawPointAt(allCoordinates);
+                    } else if(movementType.equals("Turn")) {
+                        robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(previousX, previousY, Math.toRadians(theta)), MovementPose.MovementType.turn));
                     }
-                    allCoordinates.set(positionOfEdit + 1, new Coordinate(x, y));
-                    drawer.drawPointAt(allCoordinates);
+
                 }
             }
         }

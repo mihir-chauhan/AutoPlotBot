@@ -243,6 +243,16 @@ public class MecanumDrivetrain {
                             System.out.println("PP");
                             numberOfPurePursuitPositions++;
                             positions.add(targetCoordinates.get(i).position);
+                        } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.turn)) {
+                            System.out.println("T");
+                            if (numberOfPurePursuitPositions >= 1) {
+                                positions.add(0, odometry.getCurrentPose());
+                                positions.add(positions.size() - 1, positions.get(positions.size() - 1));
+                                executePath(new Path(positions, 0.1));
+                            }
+                            numberOfPurePursuitPositions = 0;
+                            positions.clear();
+                            turnToHeading(targetCoordinates.get(i).position.heading, movementPower);
                         } else {
                             System.out.println("?");
                         }

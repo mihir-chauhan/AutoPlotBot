@@ -196,23 +196,22 @@ public class JSON {
         try {
             JSONArray list = new JSONArray();
             JSONArray jsonArray;
-            if(jsonArchitecture == JSONArchitecture.Function_Notation) {
+            if (jsonArchitecture == JSONArchitecture.Function_Notation) {
                 jsonArray = fileContents.getJSONArray("function");
             } else {
                 jsonArray = fileContents.getJSONArray("program");
             }
             int len = jsonArray.length();
             if (jsonArray != null) {
-                for (int i=0;i<len;i++) {
+                for (int i = 0; i < len; i++) {
                     //Excluding the item at position
-                    if (i != positionOfItemForRemoval)
-                    {
+                    if (i != positionOfItemForRemoval) {
                         list.put(jsonArray.get(i));
                     }
                 }
             }
             JSONObject jObject = new JSONObject();
-            if(jsonArchitecture == JSONArchitecture.Function_Notation) {
+            if (jsonArchitecture == JSONArchitecture.Function_Notation) {
                 jObject.put("function", list);
             } else {
                 jObject.put("program", list);
@@ -280,16 +279,16 @@ public class JSON {
     }
 
 
-    public static void addFunctionFromProgramToFile(String fileName, String functionName, String movementType, ArrayList<FunctionReturnFormat> functionParameters, @Nullable String filePath){
+    public static void addFunctionFromProgramToFile(String fileName, String functionName, String movementType, ArrayList<FunctionReturnFormat> functionParameters, @Nullable String filePath) {
         JSONObject jsonObject = new JSONObject();
 
         try {
             jsonObject.put("functionName", functionName);
-            if(!movementType.equals("None")) {
+            if (!movementType.equals("None")) {
                 jsonObject.put("movementType", movementType);
             }
             JSONObject parametersObject = new JSONObject();
-            for(int i = 0; i < functionParameters.size(); i++) {
+            for (int i = 0; i < functionParameters.size(); i++) {
                 parametersObject.put(functionParameters.get(i).parameterName, functionParameters.get(i).parameterValue);
             }
             jsonObject.put("parameters", parametersObject);
@@ -298,7 +297,7 @@ public class JSON {
         }
 
 
-        if(filePath == null) {
+        if (filePath == null) {
             appendJSONToTextFile(fileName, Environment.getExternalStorageDirectory() + "/Innov8rz/AutosavedFiles/", jsonObject, null, JSONArchitecture.DefaultRobotController_Notation);
         } else {
             appendJSONToTextFile(fileName, filePath, jsonObject, null, JSONArchitecture.DefaultRobotController_Notation);
@@ -312,12 +311,12 @@ public class JSON {
         try {
             ArrayList<JSONObject> functionJSONObjects = new ArrayList<>();
             JSONArray jsonArray = fileContents.getJSONArray("program");
-            for(int i = 0; i < jsonArray.length(); i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 functionJSONObjects.add(jsonArray.getJSONObject(i));
             }
             Collections.swap(functionJSONObjects, fromPosition, toPosition);
             JSONArray newlyCreatedJSONArray = new JSONArray();
-            for(int i = 0; i < functionJSONObjects.size(); i++) {
+            for (int i = 0; i < functionJSONObjects.size(); i++) {
                 newlyCreatedJSONArray.put(functionJSONObjects.get(i));
             }
             JSONObject newlyCreatedFileObject = new JSONObject();

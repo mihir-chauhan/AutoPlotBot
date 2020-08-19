@@ -5,15 +5,15 @@ import com.example.odometryapp_v10.RobotSimulation.Structure.Pose;
 
 public class MovementPose {
 
-	public enum MovementType {
-		moveForward, moveBackward, strafe, purePursuit, turn
-	}
+    public enum MovementType {
+        moveForward, moveBackward, strafe, PurePursuitTankForward, PurePursuitTankBackward, PurePursuitStrafe, turn
+    }
 
-	public Pose position;
-	public MovementType movementType;
+    public Pose position;
+    public MovementType movementType;
 
-	public MovementPose(Pose position, MovementType movementType) {
-		this.position = position;
-		this.movementType = movementType;
-	}
+    public MovementPose(Pose position, MovementType movementType) {
+        this.position = position;
+        this.movementType = movementType;
+    }
 }

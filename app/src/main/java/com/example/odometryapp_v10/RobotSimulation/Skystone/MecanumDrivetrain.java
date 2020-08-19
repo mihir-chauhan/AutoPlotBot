@@ -239,7 +239,8 @@ public class MecanumDrivetrain {
                             positions.clear();
 
                             rampTankToPosition(targetCoordinates.get(i).position, movementPower, TankDirection.backward);
-                        } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.purePursuit)) {
+                        } else if (targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.PurePursuitTankForward) || targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.PurePursuitTankBackward) || targetCoordinates.get(i).movementType.equals(MovementPose.MovementType.PurePursuitStrafe)) {
+                            //TODO: Add Tank Forward, Tank Backward, and Strafe Versions of Pure Pursuit
                             System.out.println("PP");
                             numberOfPurePursuitPositions++;
                             positions.add(targetCoordinates.get(i).position);
@@ -337,7 +338,7 @@ public class MecanumDrivetrain {
             powerToMove *= -1;
         }
         double error = desiredHeading - currAngle;
-        double gain = Math.atan2(Math.sin(error), Math.cos(error)) * 1;
+        double gain = Math.atan2(Math.sin(error), Math.cos(error));
         BackCalculation.setFrontLeftPower(checkPower(powerToMove - gain, 0.6));
         BackCalculation.setFrontRightPower(checkPower(powerToMove + gain, 0.6));
         BackCalculation.setBackLeftPower(checkPower(powerToMove - gain, 0.6));

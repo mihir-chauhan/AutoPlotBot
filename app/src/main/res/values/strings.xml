@@ -32,4 +32,9 @@
         <item>Bottom Center</item>
         <item>Bottom Right</item>
     </string-array>
+    <string-array name="purePursuitTypes">
+        <item>Tank Forward</item>
+        <item>Tank Backward</item>
+        <item>Strafe</item>
+    </string-array>
 </resources>

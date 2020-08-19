@@ -48,12 +48,14 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     public static boolean isEditingFunction = false;
     private MovementType movementType;
     private Spinner positionOnRobot;
+    private Spinner typeOfPurePursuit;
+
     private enum ParameterTypes {
         String, Integer, Double, Boolean
     }
 
     private enum MovementType {
-        TankForward, TankBackward, Strafe, PurePursuit, Turn, None
+        TankForward, TankBackward, Strafe, PurePursuit, Turn, None, PurePursuitStrafe, PurePursuitTankForward, PurePursuitTankBackward
     }
 
     @Override
@@ -99,7 +101,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                     parametersArray.add(new FunctionReturnFormat(functionName, functionParameter));
                 }
                 //returns array of format: [["parameterName", "parameterValue"], ["...", "..."], ["...", "..."], ...]
-                if(isSelectedFunctionADrivetrainFunction) {
+                if (isSelectedFunctionADrivetrainFunction) {
                     switch (positionOnRobot.getSelectedItemPosition()) {
                         case 0:
                             if (parametersArray.get(0).parameterValue instanceof Integer) {
@@ -180,6 +182,20 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                             }
                             break;
                     }
+                    if (movementType == MovementType.PurePursuit) {
+                        switch (typeOfPurePursuit.getSelectedItemPosition()) {
+                            case 0:
+                                movementType = MovementType.PurePursuitTankForward;
+                                break;
+                            case 1:
+                                movementType = MovementType.PurePursuitTankBackward;
+                                break;
+                            case 2:
+                                movementType = MovementType.PurePursuitStrafe;
+                                break;
+                        }
+                    }
+
                 }
                 listener.callFunction(selectedFunctionName, parametersArray, isSelectedFunctionADrivetrainFunction, isEditingFunction, positionToEDIT, movementType.toString());
                 isEditingFunction = false;
@@ -201,6 +217,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     private void initializeDialogComponents() {
         functionSelectorSpinner = view.findViewById(R.id.functionSelector);
         positionOnRobot = view.findViewById(R.id.callFunctionPositionOnRobot);
+        typeOfPurePursuit = view.findViewById(R.id.callFunctionPurePursuitType);
         List<String> spinnerArray = new ArrayList<>();
         spinnerArray.add("Select A Function To Call");
         try {
@@ -223,11 +240,13 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
     private static ArrayList<FunctionReturnFormat> parametersIF_EDITING = new ArrayList<>();
     private static int positionToEDIT;
+    private static String movementTypeForEditPP = "UNKNOWN";
 
-    public static void setUpFunctionEditing(int editingPosition, ArrayList<FunctionReturnFormat> parameters) {
+    public static void setUpFunctionEditing(int editingPosition, ArrayList<FunctionReturnFormat> parameters, String movementType) {
         isEditingFunction = true;
         positionToEDIT = editingPosition;
         parametersIF_EDITING = parameters;
+        movementTypeForEditPP = movementType;
         CallFunction callFunction = new CallFunction();
         callFunction.adapter.notifyDataSetChanged();
     }
@@ -264,7 +283,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                 if (jsonArray != null) {
                     int i = returnPositionFromJSONArray(jsonArray, functionName);
                     isSelectedFunctionADrivetrainFunction = jsonArray.getJSONObject(i).getString("functionType").equals("Drivetrain");
-                    if(isSelectedFunctionADrivetrainFunction) {
+                    if (isSelectedFunctionADrivetrainFunction) {
                         positionOnRobot.setVisibility(View.VISIBLE);
                         positionOnRobot.setSelection(4);
                     } else {
@@ -273,17 +292,31 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                     try {
                         if (jsonArray.getJSONObject(i).getString("movementType").equals("Tank Forward")) {
                             movementType = MovementType.TankForward;
+                            typeOfPurePursuit.setVisibility(View.GONE);
                         } else if (jsonArray.getJSONObject(i).getString("movementType").equals("Tank Backward")) {
                             movementType = MovementType.TankBackward;
+                            typeOfPurePursuit.setVisibility(View.GONE);
                         } else if (jsonArray.getJSONObject(i).getString("movementType").equals("Strafe")) {
                             movementType = MovementType.Strafe;
+                            typeOfPurePursuit.setVisibility(View.GONE);
                         } else if (jsonArray.getJSONObject(i).getString("movementType").equals("Pure Pursuit")) {
                             movementType = MovementType.PurePursuit;
+                            typeOfPurePursuit.setVisibility(View.VISIBLE);
                         } else if (jsonArray.getJSONObject(i).getString("movementType").equals("Turn")) {
                             movementType = MovementType.Turn;
+                            typeOfPurePursuit.setVisibility(View.GONE);
                         }
                     } catch (Exception ignore) {
                         movementType = MovementType.None;
+                        typeOfPurePursuit.setVisibility(View.GONE);
+                    }
+
+                    if (movementTypeForEditPP.equals("PurePursuitTankForward")) {
+                        typeOfPurePursuit.setSelection(0);
+                    } else if (movementTypeForEditPP.equals("PurePursuitTankBackward")) {
+                        typeOfPurePursuit.setSelection(1);
+                    } else if (movementTypeForEditPP.equals("PurePursuitStrafe")) {
+                        typeOfPurePursuit.setSelection(2);
                     }
                     if (i != -1) {
                         parameterTypes.clear();

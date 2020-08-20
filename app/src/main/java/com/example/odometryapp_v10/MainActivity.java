@@ -10,14 +10,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +45,8 @@ import com.google.android.material.snackbar.Snackbar;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.DocumentType;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -67,6 +73,10 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
     RobotSim robotSim;
     boolean didSendRobotSimCommand = false;
     private Pose robotOrigin = new Pose(0, 0, Math.toRadians(90));
+    ImageView fieldImage;
+    TextView coordinateOnFieldLabel;
+    TextView coordinateOnFieldDot;
+    private int shortAnimationDuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +91,46 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
         checkForWritePermission();
 
         buildRecyclerView();
+        coordinateOnFieldLabel = findViewById(R.id.coordinateOnField);
+        coordinateOnFieldDot = findViewById(R.id.coordinateOnFieldDot);
+
+        fieldImage = findViewById(R.id.fieldView);
+        fieldImage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                double xFieldCoordinate = (int) event.getX() * 144 / 584;
+                double yFieldCoordinate = (int) event.getY() * 144 / 584;
+                yFieldCoordinate = 144 - yFieldCoordinate;
+
+                coordinateOnFieldLabel.setAlpha(1f);
+                coordinateOnFieldDot.setAlpha(1f);
+
+
+
+                float x = event.getX();
+                float y = event.getY();
+//                if(xFieldCoordinate % 24 < 3) {
+//                    xFieldCoordinate = ((int) Math.floor(xFieldCoordinate/24)) * 24;
+//                    x = ((int)Math.floor(x / (24 * 584 / 144))) * (24 * 584 / 144);
+//                }
+//
+//                if(yFieldCoordinate % 24 < 3) {
+//                    yFieldCoordinate = ((int) Math.floor(yFieldCoordinate/24)) * 24;
+//                    y = ((int)Math.floor(y / (24 * 584 / 144))) * (24 * 584 / 144);
+//                }
+
+
+                coordinateOnFieldLabel.setX(x - 10);
+                coordinateOnFieldLabel.setY(y - 50);
+                coordinateOnFieldLabel.setText("(" + xFieldCoordinate + ", " + yFieldCoordinate + ")");
+                coordinateOnFieldDot.setX(x - 10);
+                coordinateOnFieldDot.setY(y - 50);
+                coordinateOnFieldDot.setText("•");
+
+                fade();
+                return true;
+            }
+        });
 
         simulate = findViewById(R.id.simulate);
 
@@ -144,6 +194,9 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                 setOrigin(new Pose(0, 0, Math.toRadians(90)), true);
                 robotSimulatorMovementCoordinates.clear();
                 listOfAllFunctionParameters.clear();
+
+                shortAnimationDuration = getResources().getInteger(
+                        android.R.integer.config_shortAnimTime);
             }
         });
 
@@ -159,6 +212,18 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
 
         canRunFABThread = true;
         enableOrDisableFAButtons();
+    }
+
+    private void fade() {
+        coordinateOnFieldLabel.animate()
+                .alpha(0f)
+                .setDuration(5000)
+                .setListener(null);
+
+        coordinateOnFieldDot.animate()
+                .alpha(0f)
+                .setDuration(5000)
+                .setListener(null);
     }
 
     private void checkForWritePermission() {
@@ -426,10 +491,14 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                                     }
                                 };
 
-                                if (f.list(filter).length >= 1) {
-                                    loadFunction.setEnabled(true);
-                                } else {
-                                    loadFunction.setEnabled(false);
+                                try {
+                                    if (f.list(filter).length >= 1) {
+                                        loadFunction.setEnabled(true);
+                                    } else {
+                                        loadFunction.setEnabled(false);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
 
 

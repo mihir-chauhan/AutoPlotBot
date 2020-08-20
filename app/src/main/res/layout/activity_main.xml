@@ -2,87 +2,93 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:id="@+id/coordinator"
     tools:context=".MainActivity">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-            <com.github.sealstudios.fab.FloatingActionMenu
-                android:id="@+id/floatingActionMenu"
+        <com.github.sealstudios.fab.FloatingActionMenu
+            android:id="@+id/floatingActionMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="10dp"
+            app:menu_backgroundColor="@android:color/transparent"
+            app:menu_colorNormal="@color/colorAccent"
+            app:menu_colorPressed="@color/colorAccent"
+            app:menu_colorRipple="@color/colorAccent"
+            app:menu_labels_showShadow="true"
+            app:menu_openDirection="left">
+
+            <com.github.sealstudios.fab.FloatingActionButton
+                android:id="@+id/setOrigin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentBottom="true"
-                android:layout_margin="10dp"
-                app:menu_backgroundColor="@android:color/transparent"
-                app:menu_openDirection="left"
-                app:menu_labels_showShadow="true"
-                app:menu_colorNormal="@color/colorAccent"
-                app:menu_colorPressed="@color/colorAccent"
-                app:menu_colorRipple="@color/colorAccent">
+                android:src="@drawable/ic_gps_fixed_black_24dp"
+                app:fab_colorDisabled="#404040"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@android:color/white"
+                app:fab_colorRipple="@color/colorAccent"
+                app:fab_size="mini" />
 
-                <com.github.sealstudios.fab.FloatingActionButton
-                    android:id="@+id/setOrigin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:fab_size="mini"
-                    android:src="@drawable/ic_gps_fixed_black_24dp"
-                    app:fab_colorDisabled="#404040"
-                    app:fab_colorNormal="@color/colorAccent"
-                    app:fab_colorRipple="@color/colorAccent"
-                    app:fab_colorPressed="@android:color/white"/>
+            <com.github.sealstudios.fab.FloatingActionButton
+                android:id="@+id/callFunction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_playlist_add_black_24dp"
+                app:fab_colorDisabled="#404040"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@android:color/white"
+                app:fab_colorRipple="@color/colorAccent"
+                app:fab_size="mini" />
 
-                <com.github.sealstudios.fab.FloatingActionButton
-                    android:id="@+id/callFunction"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:fab_size="mini"
-                    app:fab_colorDisabled="#404040"
-                    android:src="@drawable/ic_playlist_add_black_24dp"
-                    app:fab_colorNormal="@color/colorAccent"
-                    app:fab_colorRipple="@color/colorAccent"
-                    app:fab_colorPressed="@android:color/white"/>
+            <com.github.sealstudios.fab.FloatingActionButton
+                android:id="@+id/saveFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_save_black_24dp"
+                app:fab_colorDisabled="#404040"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@android:color/white"
+                app:fab_colorRipple="@color/colorAccent"
+                app:fab_size="mini" />
 
-                <com.github.sealstudios.fab.FloatingActionButton
-                    android:id="@+id/saveFile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:fab_size="mini"
-                    android:src="@drawable/ic_save_black_24dp"
-                    app:fab_colorDisabled="#404040"
-                    app:fab_colorNormal="@color/colorAccent"
-                    app:fab_colorRipple="@color/colorAccent"
-                    app:fab_colorPressed="@android:color/white"/>
+            <com.github.sealstudios.fab.FloatingActionButton
+                android:id="@+id/uploadFile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_file_upload_black_24dp"
+                app:fab_colorDisabled="#404040"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@android:color/white"
+                app:fab_colorRipple="@color/colorAccent"
+                app:fab_size="mini" />
 
-                <com.github.sealstudios.fab.FloatingActionButton
-                    android:id="@+id/uploadFile"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:fab_size="mini"
-                    app:fab_colorDisabled="#404040"
-                    android:src="@drawable/ic_file_upload_black_24dp"
-                    app:fab_colorNormal="@color/colorAccent"
-                    app:fab_colorRipple="@color/colorAccent"
-                    app:fab_colorPressed="@android:color/white"/>
+            <com.github.sealstudios.fab.FloatingActionButton
+                android:id="@+id/newProgram"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_fiber_new_black_24dp"
+                app:fab_colorDisabled="#404040"
+                app:fab_colorNormal="@color/colorAccent"
+                app:fab_colorPressed="@android:color/white"
+                app:fab_colorRipple="@color/colorAccent"
+                app:fab_size="mini" />
 
-                <com.github.sealstudios.fab.FloatingActionButton
-                    android:id="@+id/newProgram"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:fab_size="mini"
-                    android:src="@drawable/ic_fiber_new_black_24dp"
-                    app:fab_colorDisabled="#404040"
-                    app:fab_colorNormal="@color/colorAccent"
-                    app:fab_colorRipple="@color/colorAccent"
-                    app:fab_colorPressed="@android:color/white"/>
+        </com.github.sealstudios.fab.FloatingActionMenu>
 
-            </com.github.sealstudios.fab.FloatingActionMenu>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="17px"
+            android:layout_marginTop="17px">
 
             <ImageView
                 android:id="@+id/fieldView"
@@ -90,8 +96,6 @@
                 android:layout_height="584px"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
-                android:layout_marginStart="17px"
-                android:layout_marginTop="17px"
                 android:scaleType="centerInside"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -99,23 +103,43 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
-                app:srcCompat="@drawable/field_image2" />
+                app:srcCompat="@drawable/field_image2"
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/programFunctionsRecyclerView"
+                />
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/fieldView"
-                android:layout_marginTop="17px"
-                android:layout_marginRight="17px"
-                android:layout_marginLeft="17px"
-                android:scrollbars="vertical"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
-                android:layout_above="@id/floatingActionMenu"
-                android:background="#303030"
+                android:id="@+id/coordinateOnField"
+                android:textSize="20px"
+                android:text=""
+                android:textColor="@android:color/white"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/coordinateOnFieldDot"
+                android:textSize="70px"
+                android:textColor="@color/colorAccent"
                 />
 
         </RelativeLayout>
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/programFunctionsRecyclerView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/floatingActionMenu"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="17px"
+            android:layout_marginTop="17px"
+            android:layout_marginRight="17px"
+            android:layout_toRightOf="@id/fieldView"
+            android:background="#303030"
+            android:scrollbars="vertical" />
+
+    </RelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

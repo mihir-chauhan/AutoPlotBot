@@ -87,6 +87,7 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/fieldViewLayout"
             android:layout_marginStart="17px"
             android:layout_marginTop="17px">
 
@@ -136,7 +137,7 @@
             android:layout_marginLeft="17px"
             android:layout_marginTop="17px"
             android:layout_marginRight="17px"
-            android:layout_toRightOf="@id/fieldView"
+            android:layout_toRightOf="@id/fieldViewLayout"
             android:background="#303030"
             android:scrollbars="vertical" />
 

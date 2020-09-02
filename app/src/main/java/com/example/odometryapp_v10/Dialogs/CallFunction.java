@@ -51,7 +51,11 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     private Spinner typeOfPurePursuit;
 
     private enum ParameterTypes {
-        String, Integer, Double, Boolean
+        String, Integer, Double, Boolean, Selection
+    }
+
+    private enum ParameterElementType {
+        Switch, Text, Spinner
     }
 
     private enum MovementType {
@@ -89,13 +93,15 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                     String functionName = parameterNames.get(parameters);
                     Object functionParameter;
                     if (parameterTypes.get(parameters).equals("Boolean")) {
-                        functionParameter = (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), true));
+                        functionParameter = (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), ParameterElementType.Switch));
+                    } else if (parameterTypes.get(parameters).equals("Selection")) {
+                        functionParameter = (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), ParameterElementType.Spinner));
                     } else {
-                        if (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false).equals("")) {
+                        if (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), ParameterElementType.Text).equals("")) {
                             Toast.makeText(getContext(), "One or more fields are blank", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        functionParameter = (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), false));
+                        functionParameter = (adapter.getParameterNamesFromView(adapter.getViewByPosition(parameters, listView), ParameterElementType.Text));
                     }
 
                     parametersArray.add(new FunctionReturnFormat(functionName, functionParameter));
@@ -273,8 +279,11 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
     ArrayList<String> parameterTypes = new ArrayList<>();
     boolean isSelectedFunctionADrivetrainFunction;
 
+    ArrayList<ArrayList<String>> selectionParameterOptions;
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        selectionParameterOptions = new ArrayList<>();
         if (position >= 1) {
             String functionName = allFunctionNames.get(functionSelectorSpinner.getSelectedItemPosition() - 1);
             selectedFunctionName = functionName;
@@ -322,12 +331,23 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                         parameterTypes.clear();
                         parameterNames.clear();
                         Iterator<String> keys = jsonArray.getJSONObject(i).getJSONObject("parameters").keys();
-
                         while (keys.hasNext()) {
                             String key = keys.next();
                             try {
                                 parameterNames.add(key);
-                                parameterTypes.add(jsonArray.getJSONObject(i).getJSONObject("parameters").get(key).toString());
+                                try {
+                                    if(jsonArray.getJSONObject(i).getJSONObject("parameters").getJSONArray(key).length() >= 1) {
+                                        parameterTypes.add("Selection");
+                                        ArrayList<String> options = new ArrayList<>();
+                                        for(int y = 0; y < jsonArray.getJSONObject(i).getJSONObject("parameters").getJSONArray(key).length(); y++) {
+                                            options.add(jsonArray.getJSONObject(i).getJSONObject("parameters").getJSONArray(key).getString(y));
+                                        }
+                                        selectionParameterOptions.add(options);
+                                    }
+                                } catch (Exception ignore) {
+                                    parameterTypes.add(jsonArray.getJSONObject(i).getJSONObject("parameters").get(key).toString());
+                                    selectionParameterOptions.add(new ArrayList<String>());
+                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -390,6 +410,7 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
                 holder = new ViewHolder();
                 holder.editText = convertView.findViewById(R.id.callFunctionParameterInput);
                 holder.booleanSwitch = convertView.findViewById(R.id.booleanSwitch);
+                holder.optionsSelector = convertView.findViewById(R.id.optionsSpinner);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -398,10 +419,16 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
 
             holder.editText.setVisibility(View.INVISIBLE);
             holder.booleanSwitch.setVisibility(View.INVISIBLE);
+            holder.optionsSelector.setVisibility(View.INVISIBLE);
 
             if (parameterTypes.get(position).equals(ParameterTypes.Boolean.toString())) {
                 holder.booleanSwitch.setVisibility(View.VISIBLE);
                 holder.booleanSwitch.setText(parameterNames.get(position).substring(0, 1).toUpperCase() + parameterNames.get(position).substring(1));
+            } else if (parameterTypes.get(position).equals(ParameterTypes.Selection.toString())) {
+                holder.optionsSelector.setVisibility(View.VISIBLE);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(convertView.getContext(), android.R.layout.simple_spinner_item, selectionParameterOptions.get(position));
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                holder.optionsSelector.setAdapter(adapter);
             } else {
                 holder.editText.setVisibility(View.VISIBLE);
                 holder.editText.setHint(parameterNames.get(position).substring(0, 1).toUpperCase() + parameterNames.get(position).substring(1));
@@ -447,29 +474,33 @@ public class CallFunction extends AppCompatDialogFragment implements AdapterView
             return parameterName.getText().toString();
         }
 
-        public Object getParameterNamesFromView(View view, boolean isBoolean) {
-
-            if (!isBoolean) {
-                try {
-                    Scanner scanner = new Scanner(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
-                    if (scanner.hasNextInt()) {
-                        return Integer.parseInt(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
-                    } else if (scanner.hasNextDouble()) {
-                        return Double.parseDouble(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
-                    } else {
+        public Object getParameterNamesFromView(View view, ParameterElementType elementType) {
+            switch (elementType) {
+                case Switch:
+                    return ((Switch) view.findViewById(R.id.booleanSwitch)).isChecked();
+                case Text:
+                    try {
+                        Scanner scanner = new Scanner(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
+                        if (scanner.hasNextInt()) {
+                            return Integer.parseInt(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
+                        } else if (scanner.hasNextDouble()) {
+                            return Double.parseDouble(((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString());
+                        } else {
+                            return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
+                        }
+                    } catch (Exception e) {
                         return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
                     }
-                } catch (Exception e) {
-                    return ((EditText) view.findViewById(R.id.callFunctionParameterInput)).getText().toString();
-                }
-            } else {
-                return ((Switch) view.findViewById(R.id.booleanSwitch)).isChecked();
+                case Spinner:
+                    return ((Spinner) view.findViewById(R.id.optionsSpinner)).getSelectedItem().toString();
             }
+            return "";
         }
     }
 
     public static class ViewHolder {
         EditText editText;
         Switch booleanSwitch;
+        Spinner optionsSelector;
     }
 }

@@ -275,8 +275,15 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
 //                    System.out.println("callF: " + callFunction.canSetSelectionOfFunctionSelector);
 //                }
 
-                CallFunction.setUpFunctionEditing(position, listOfAllFunctionParameters.get(position), robotSimulatorMovementCoordinates.get(position).movementType.toString());
-                System.out.println("asdf: " + robotSimulatorMovementCoordinates.get(position).movementType.toString());
+                String movementType = "UNKNOWN";
+
+                try {
+                    movementType = robotSimulatorMovementCoordinates.get(position).movementType.toString();
+                } catch (Exception ignore) {
+                    //do nothing
+                }
+
+                CallFunction.setUpFunctionEditing(position, listOfAllFunctionParameters.get(position), movementType);
                 CallFunction.populateComponentsForEditing(positionOfFunction);
             }
         });

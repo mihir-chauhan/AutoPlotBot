@@ -302,9 +302,10 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
 
                 Collections.swap(listOfAllFunctionParameters, toPosition, fromPosition);
 
+                System.out.println("argbarg: " + recyclerViewItemArrayList.get(fromPosition).getFunctionParameters() + ", " + recyclerViewItemArrayList.get(toPosition).getFunctionParameters());
 
-                if (recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("x") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("x")) {
-                    if (recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("y") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("y")) {
+                if (recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("x:") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("x:")) {
+                    if (recyclerViewItemArrayList.get(fromPosition).getFunctionParameters().contains("y:") && recyclerViewItemArrayList.get(toPosition).getFunctionParameters().contains("y:")) {
                         int robotPointsOffSet = 0;
                         for (int i = 0; i < fromPosition; i++) {
                             if (!recyclerViewItemArrayList.get(i).getFunctionParameters().contains("x") && !recyclerViewItemArrayList.get(i).getFunctionParameters().contains("y")) {

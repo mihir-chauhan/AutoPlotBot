@@ -47,7 +47,7 @@ public class RobotSim {
         myOptions.inPreferredConfig = Bitmap.Config.ARGB_8888;// important
         myOptions.inPurgeable = true;
 
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.field_image2, myOptions);
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.field_image3, myOptions);
 
         paint = new Paint();
         paint.setAntiAlias(true);

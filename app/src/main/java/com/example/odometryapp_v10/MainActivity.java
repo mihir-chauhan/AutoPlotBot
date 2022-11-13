@@ -883,6 +883,7 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
         setOrigin(robotOrigin, true);
 
         if (fileFunctions.size() >= 1) {
+            double previousXPos = 0.0, previousYPos = 0.0;
             for (int i = 0; i < fileFunctions.size(); i++) {
                 ArrayList<FunctionReturnFormat> functionParameters = new ArrayList<>();
                 for (int x = 0; x < fileFunctions.get(i).parameters.size(); x++) {
@@ -898,12 +899,14 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                             } else {
                                 x = (double) fileFunctions.get(i).parameters.get(a).parameterValue;
                             }
+                            previousXPos = x;
                         } else if (fileFunctions.get(i).parameters.get(a).parameterName.equals("y")) {
                             if (fileFunctions.get(i).parameters.get(a).parameterValue instanceof Integer) {
                                 y = (double) ((Integer) fileFunctions.get(i).parameters.get(a).parameterValue).intValue();
                             } else {
                                 y = (double) fileFunctions.get(i).parameters.get(a).parameterValue;
                             }
+                            previousYPos = y;
                         } else if (fileFunctions.get(i).parameters.get(a).parameterName.equals("heading")) {
                             if (fileFunctions.get(i).parameters.get(a).parameterValue instanceof Integer) {
                                 heading = (double) ((Integer) fileFunctions.get(i).parameters.get(a).parameterValue).intValue();
@@ -912,7 +915,11 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                             }
                         }
                     }
-                    allCoordinates.add(new Coordinate(x, y));
+                    if(fileFunctions.get(i).movementType.equals("Turn")) {
+                        allCoordinates.add(new Coordinate(previousXPos, previousYPos));
+                    } else {
+                        allCoordinates.add(new Coordinate(x, y));
+                    }
                     drawer.drawPointAt(allCoordinates);
                     if (!fileFunctions.get(i).movementType.equals("None")) {
                         if (fileFunctions.get(i).movementType.equals("Strafe")) {
@@ -927,6 +934,8 @@ public class MainActivity extends AppCompatActivity implements CallFunction.call
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.PurePursuitTankBackward));
                         } else if (fileFunctions.get(i).movementType.equals("PurePursuitStrafe")) {
                             robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(x, y, Math.toRadians(0)), MovementPose.MovementType.PurePursuitStrafe));
+                        } else if (fileFunctions.get(i).movementType.equals("Turn")) {
+                            robotSimulatorMovementCoordinates.add(new MovementPose(new Pose(previousXPos, previousYPos, Math.toRadians(heading)), MovementPose.MovementType.turn));
                         }
                     }
                 }

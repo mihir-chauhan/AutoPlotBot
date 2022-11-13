@@ -165,17 +165,20 @@ public class MecanumDrivetrain {
         if (targetHeading - currAngle > Math.toRadians(180)) {
             targetHeading -= Math.toRadians(360);
         }
+        System.out.println("ENRERING"  +Math.toDegrees(Math.abs(targetHeading - currAngle)));
         while (Math.abs(targetHeading - currAngle) > 0.0175) {
-            if (targetHeading - currAngle > Math.toRadians(2)) {
-                BackCalculation.setFrontLeftPower(-inputPower);
-                BackCalculation.setFrontRightPower(inputPower);
-                BackCalculation.setBackLeftPower(-inputPower);
-                BackCalculation.setBackRightPower(inputPower);
-            } else if (targetHeading - currAngle < Math.toRadians(2)) {
-                BackCalculation.setFrontLeftPower(inputPower);
-                BackCalculation.setFrontRightPower(-inputPower);
-                BackCalculation.setBackLeftPower(inputPower);
-                BackCalculation.setBackRightPower(-inputPower);
+            System.out.println(Math.toDegrees(Math.abs(targetHeading - currAngle)));
+            final double dampeningConst = 0.5;
+            if (targetHeading - currAngle > 0) {
+                BackCalculation.setFrontLeftPower(-inputPower * (Math.abs(targetHeading - currAngle) + dampeningConst));
+                BackCalculation.setFrontRightPower(inputPower * (Math.abs(targetHeading - currAngle) + dampeningConst));
+                BackCalculation.setBackLeftPower(-inputPower * (Math.abs(targetHeading - currAngle) + dampeningConst));
+                BackCalculation.setBackRightPower(inputPower * (Math.abs(targetHeading - currAngle) + dampeningConst));
+            } else if (targetHeading - currAngle < 0) {
+                BackCalculation.setFrontLeftPower(inputPower * (Math.abs(targetHeading - currAngle) + dampeningConst));
+                BackCalculation.setFrontRightPower(-inputPower * (Math.abs(targetHeading - currAngle) + dampeningConst));
+                BackCalculation.setBackLeftPower(inputPower * (Math.abs(targetHeading - currAngle) + dampeningConst));
+                BackCalculation.setBackRightPower(-inputPower * (Math.abs(targetHeading - currAngle) + dampeningConst));
             } else {
                 break;
             }
